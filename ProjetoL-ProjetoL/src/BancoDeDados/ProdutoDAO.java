@@ -1120,17 +1120,85 @@ public class ProdutoDAO {
         }
     }
 
+    public static void darBaixaEstoqueIngredienteFuncionario(int id_ingrediente, int quantidadeReduzir, int id_produto, int id_funcionario, int quantidade, int contagem) {
+        int estoque = 0;
+        double precoProduto = 0;
 
-    public static void createTable(Connection conn) {
-        String createTempTableSQL = "CREATE TEMP TABLE IF NOT EXISTS temp_ingredientes AS " +
-                "SELECT id_ingrediente, estoque FROM piramide.ingredientes";
+        // Incrementa o contador aqui dentro da lógica de processamento
+        contador++;
 
-        try (Statement stmt = conn.createStatement()) { // Usando Statement para comandos SQL sem parâmetros
-            // Cria a tabela temporária com os dados (se não existir)
-            stmt.executeUpdate(createTempTableSQL);
+        // Consultar o estoque
+        String sql = "SELECT estoque FROM piramide.carrinhos_ingredientes WHERE id_ingrediente = ?";
+        try (Connection conn = ConexaoBD.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id_ingrediente);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    estoque = rs.getInt("estoque");
+                }
+            }
+
+            sql = "UPDATE piramide.carrinhos_ingredientes SET estoque = ? WHERE id_ingrediente = ?";
+            try (PreparedStatement updatePstmt = conn.prepareStatement(sql)) {
+                updatePstmt.setInt(1, estoque - quantidadeReduzir); // Subtrai a quantidade
+                updatePstmt.setInt(2, id_ingrediente); // ID do ingrediente
+
+                updatePstmt.executeUpdate();
+
+            } catch (SQLException e) {
+                System.out.println("Erro ao atualizar o estoque na tabela temporária: " + e.getMessage());
+            }
 
         } catch (SQLException e) {
-            System.out.println("Erro ao criar ou popular a tabela temporária: " + e.getMessage());
+            System.out.println("Erro ao consultar estoque: " + e.getMessage());
+        }
+
+        // Obtém o total do carrinho do cliente
+        double total = totalCarrinhoFuncionarioDAO(id_funcionario);
+
+        // Consulta o preço do produto
+        sql = "SELECT preco, estoque FROM piramide.produtos WHERE id_produto = ?";
+        try (Connection conn = ConexaoBD.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id_produto);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    precoProduto = rs.getDouble("preco");
+                    int estoqueProduto = rs.getInt("estoque");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro no a: " + e.getMessage());
+        }
+
+        // Inserção no carrinho quando o contador atingir a contagem
+        if(contador == contagem){
+            sql = "INSERT INTO piramide.carrinhos (id_funcionario, id_produto, preco, quantidade, total) VALUES (?, ?, ?, ?, ?)";
+
+            try (Connection conn = ConexaoBD.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setInt(1, id_funcionario);
+                pstmt.setInt(2, id_produto);
+                pstmt.setDouble(3, precoProduto);
+                pstmt.setInt(4, quantidade);
+                pstmt.setDouble(5, total + (precoProduto * quantidade));
+
+                int rowsAffected = pstmt.executeUpdate();
+                if (rowsAffected > 0) {
+                    System.out.println("Produto inserido com sucesso no pedido!");
+                } else {
+                    System.out.println("Nenhuma linha foi inserida. Verifique os dados.");
+                }
+            } catch (SQLException e) {
+                System.err.println("Erro ao inserir o pedido: " + e.getMessage());
+            }
+
+            contador = 0;
         }
     }
 }
