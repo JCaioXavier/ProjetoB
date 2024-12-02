@@ -9,3 +9,4 @@ public class Carrinho {
     public double preco;
     public double total;
 }
+
