@@ -2,49 +2,46 @@
 
 package Util;
 
-import Entidades.Carrinho;
-import Entidades.Funcionario;
-import Entidades.Mesa;
-import Entidades.Produto;
+import BancoDeDados.ConexaoBD;
+import Entidades.*;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
+import static BancoDeDados.CriptografiaDAO.Criptografia;
 import static BancoDeDados.FuncionarioDAO.checkadordeFuncionariosDAO;
-import static Util.DadosEstaticos.gerarProduto;
 
 public class GerenciadorDeFuncionarios {
     private static int contadorFuncionarios = 1;
 
-    public static void confirmarDadosFuncionarios(Funcionario funcionario) {//PEDE A CONFIRMAÇÃO DOS DADOS -------------
-        System.out.println("Seus dados estão corretos?\n" +
+    public static void confirmarDadosFuncionarios(Funcionario funcionario, String senha) {//PEDE A CONFIRMAÇÃO DOS DADOS -------------
+        System.out.println("\n===========================" +
+                "Seus dados estão corretos?\n" +
                 "Usuario: " + funcionario.usuario + "\n" +
-                "Senha: " + funcionario.senha + "\n" +
+                "Senha: " + senha + "\n" +
                 "Nome: " + funcionario.nome + "\n" +
                 "CPF: " + funcionario.cpf + "\n" +
                 "Telefone: " + funcionario.telefone + "\n" +
-                "Endereço: " + funcionario.endereco + "\n");
+                "Endereço: " + funcionario.endereco + "\n" +
+                "===========================");
+
     }
 
-    public static Funcionario cadastrarFuncionario() { //CADASTRO --------------
+    public static Funcionario cadastrarFuncionarioDAO() { //CADASTRO --------------
         Funcionario novoFuncionario = new Funcionario();
         Scanner scanner = new Scanner(System.in);
 
         checkadordeFuncionariosDAO(novoFuncionario);
 
-        do {
-            System.out.print("Digite a senha: ");
-            novoFuncionario.senha = scanner.nextLine();
+        Map<String, String> resultado = Criptografia();
 
-            while (novoFuncionario.senha.length() > 50) {
-                System.out.println("Senha não pode ser maior que 50 caracteres.");
-                System.out.print("Digite a senha: ");
-                novoFuncionario.senha = scanner.nextLine();
-            }
-            if (novoFuncionario.senha.isEmpty()) {
-                System.out.println("Senha não pode ser vazio ou apenas espaços! Digite novamente.");
-            }
-        } while (novoFuncionario.senha.isEmpty());
+        String senha = resultado.get("senha");
+        novoFuncionario.senha = resultado.get("SenhaCriptografada");
 
         do {
             System.out.print("Digite o nome do(a) funcionário(a): ");
@@ -91,6 +88,8 @@ public class GerenciadorDeFuncionarios {
                 System.out.println("Nome não pode ser vazio ou apenas espaços! Digite novamente.");
             }
         } while (novoFuncionario.endereco.isEmpty());
+
+        confirmarDadosFuncionarios(novoFuncionario, senha);
 
         return novoFuncionario;
     }
@@ -197,77 +196,104 @@ public class GerenciadorDeFuncionarios {
         }
     }
 
-    public static Funcionario editarFuncionario(List<Funcionario> funcionarios, int indexFuncionario) {//-----------------------
+    public static Funcionario editarFuncionario(int id) {
         Scanner scanner = new Scanner(System.in);
-        Funcionario funcionarioAtual = funcionarios.get(indexFuncionario);
+        Funcionario funcionarioAtual = new Funcionario();
 
-        System.out.println("\nFuncionario atual: " + indexFuncionario);// mostra as informações do produto escolhido
+        String senha, senhaLogin;
 
-        checkadordeFuncionarios(funcionarioAtual, funcionarios);
+        boolean usuarioExistente = true;
 
-        do {
-            System.out.print("Digite a senha: ");
-            funcionarioAtual.senha = scanner.nextLine();
+        funcionarioAtual.id_funcionario = id;
 
-            while (funcionarioAtual.senha.length() > 50) {
-                System.out.println("Senha não pode ser maior que 50 caracteres.");
-                System.out.print("Digite a senha: ");
-                funcionarioAtual.senha = scanner.nextLine();
-            }
-            if (funcionarioAtual.senha.isEmpty()) {
-                System.out.println("Senha não pode ser vazio ou apenas espaços! Digite novamente.");
-            }
-        } while (funcionarioAtual.senha.isEmpty());
+        checkadordeFuncionariosDAO(funcionarioAtual);
 
         do {
-            System.out.print("Digite o nome do(a) funcionário(a): ");
+            Map<String, String> resultado = Criptografia();
+
+            funcionarioAtual.senha = resultado.get("SenhaCriptografada");
+
+            String sql = "SELECT senha FROM piramide.funcionarios WHERE id_funcionario = ?";
+
+            try (Connection conn = ConexaoBD.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setInt(1, id);
+
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    senhaLogin = rs.getString("senha");
+
+                    if(senhaLogin.equals(funcionarioAtual.senha)){
+                        usuarioExistente = false;
+                    }else{
+                        System.out.println("Senha incorreta! Digite novamente.");
+                    }
+                }
+
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        } while (usuarioExistente);
+
+        do {
+            System.out.print("Digite seu nome: ");
             funcionarioAtual.nome = scanner.nextLine();
 
             while (funcionarioAtual.nome.length() > 100) {
-                System.out.println("Nome não pode ser maior que 100 caracteres.");
-                System.out.print("Digite o nome do(a) funcionário(a): ");
+                System.out.println("[ERROR] Nome não pode ser maior que 100 caracteres.");
+                System.out.print("Digite seu nome: ");
                 funcionarioAtual.nome = scanner.nextLine();
             }
             if (funcionarioAtual.nome.isEmpty()) {
-                System.out.println("Nome não pode ser vazio ou apenas espaços! Digite novamente.");
+                System.out.println("[ERROR] Nome não pode ser vazio ou apenas espaços!");
             }
         } while (funcionarioAtual.nome.isEmpty());
 
-        System.out.print("Digite o CPF do(a) funcionário(a): ");
+        System.out.print("Digite seu CPF: ");
         funcionarioAtual.cpf = scanner.nextLine();
 
         while (funcionarioAtual.cpf.length() != 11) {
-            System.out.println("CPF tem que ser igual a 11 digitos.");
-            System.out.print("Digite o CPF do funcionário(a): ");
+            System.out.println("[ERROR] CPF tem que ser igual a 11 digitos.");
+            System.out.print("Digite seu CPF: ");
             funcionarioAtual.cpf = scanner.nextLine();
         }
 
-        System.out.print("Digite telefone do(a) funcionário(a): ");
+        System.out.print("Digite seu telefone: ");
         funcionarioAtual.telefone = scanner.nextLine();
 
-        while (funcionarioAtual.telefone.length() < 8 || funcionarioAtual.nome.length() > 14) {
-            System.out.println("O telefone tem que ter ao menos 9 digitos.");
-            System.out.print("Digite telefone do funcionário(a): ");
+        while (funcionarioAtual.telefone.length() < 9 || funcionarioAtual.nome.length() > 14) {
+            System.out.println("[ERROR] Telefone tem que ter ao menos 9 digitos.");
+            System.out.print("Digite seu telefone: ");
             funcionarioAtual.telefone = scanner.nextLine();
         }
 
         do {
-            System.out.print("Digite o endereço do(a) funcionário(a): ");
+            System.out.print("Digite o endereço para entrega: ");
             funcionarioAtual.endereco = scanner.nextLine();
 
             while (funcionarioAtual.endereco.length() > 100) {
-                System.out.println("Endereço não pode ser maior que 100 caracteres.");
-                System.out.print("Digite o endereço do(a) funcionário(a): ");
+                System.out.println("[ERROR] Endereço não pode ser maior que 100 caracteres.");
+                System.out.print("Digite o endereço para entrega: ");
                 funcionarioAtual.endereco = scanner.nextLine();
             }
             if (funcionarioAtual.endereco.isEmpty()) {
-                System.out.println("Nome não pode ser vazio ou apenas espaços! Digite novamente.");
+                System.out.println("[ERROR] Endereço não pode ser vazio ou apenas espaços!");
             }
         } while (funcionarioAtual.endereco.isEmpty());
 
-        System.out.println("\nFuncionario atual: " + funcionarioAtual);
+        System.out.println("\nUsuário atual: " + funcionarioAtual);
 
-        System.out.println("\nFuncionario editado com sucesso!");
+        System.out.println("\nUsuário atual: " +
+                "===========================" +
+                "Usuario: " + funcionarioAtual.usuario + "\n" +
+                "Senha: " + funcionarioAtual.senha + "\n" +
+                "Nome: " + funcionarioAtual.nome + "\n" +
+                "Cpf: " + funcionarioAtual.cpf + "\n" +
+                "Endereço: " + funcionarioAtual.endereco + "\n" +
+                "Telefone: " + funcionarioAtual.telefone + "\n");
+        System.out.println("===========================");
 
         return funcionarioAtual;
     }
@@ -368,8 +394,6 @@ public class GerenciadorDeFuncionarios {
         } while (funcionarioAtual.endereco.isEmpty());
 
         System.out.println("\nFuncionario atual: " + funcionarioAtual);
-
-        System.out.println("\nFuncionario editado com sucesso!");
 
         return funcionarioAtual;
     }

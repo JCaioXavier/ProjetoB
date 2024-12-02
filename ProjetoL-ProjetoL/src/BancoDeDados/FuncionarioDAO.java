@@ -5,15 +5,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
+import Entidades.Cliente;
 import Entidades.Funcionario;
 
 import static BancoDeDados.ConexaoBD.conn;
+import static BancoDeDados.CriptografiaDAO.Criptografia;
 
 public class FuncionarioDAO {
     public static void funcionariosDAO() {
-        String sql = "SELECT id_funcionario, nome, usuario, senha, cpf, telefone, endereco FROM piramide.funcionarios ORDER BY id_funcionario ASC";
+        String sql = "SELECT id_funcionario, nome_funcionario, usuario, senha, cpf, telefone, endereco FROM piramide.funcionarios ORDER BY id_funcionario ASC";
         try (Connection conn = ConexaoBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
@@ -21,7 +24,7 @@ public class FuncionarioDAO {
             while (rs.next()) {
                 System.out.println("===========================");
                 System.out.println("Id_funcionario: " + rs.getString("id_funcionario") +
-                        "\nNome: " + rs.getString("nome") +
+                        "\nNome: " + rs.getString("nome_funcionario") +
                         "\nUsuário: " + rs.getString("usuario") +
                         "\nSenha: " + rs.getString("senha") +
                         "\nCPF: " + rs.getString("cpf") +
@@ -38,18 +41,18 @@ public class FuncionarioDAO {
 
         String usuario = novo.usuario;
         String senha = novo.senha;
-        String nome = novo.nome;
+        String nome_funcionario = novo.nome;
         String cpf = novo.cpf;
         String telefone = novo.telefone;
         String endereco = novo.endereco;
 
-        String sql = "INSERT INTO piramide.funcionarios (usuario, senha, nome, cpf, telefone, endereco) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO piramide.funcionarios (usuario, senha, nome_funcionario, cpf, telefone, endereco) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConexaoBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, usuario);
             pstmt.setString(2, senha);
-            pstmt.setString(3, nome);
+            pstmt.setString(3, nome_funcionario);
             pstmt.setString(4, cpf);
             pstmt.setString(5, telefone);
             pstmt.setString(6, endereco);
@@ -85,20 +88,20 @@ public class FuncionarioDAO {
 
         String usuario = update.usuario;
         String senha = update.senha;
-        String nome = update.nome;
+        String nome_funcionario = update.nome;
         String cpf = update.cpf;
         String telefone = update.telefone;
         String endereco = update.endereco;
 
         System.out.println(update);
 
-        String sql = "UPDATE piramide.funcionarios SET usuario = ?, senha = ?, nome = ?, cpf = ?, telefone = ?, endereco = ? WHERE id_funcionario = " + idf;
+        String sql = "UPDATE piramide.funcionarios SET usuario = ?, senha = ?, nome_funcionario = ?, cpf = ?, telefone = ?, endereco = ? WHERE id_funcionario = " + idf;
 
         try (Connection conn = ConexaoBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, usuario);
             pstmt.setString(2, senha);
-            pstmt.setString(3, nome);
+            pstmt.setString(3, nome_funcionario);
             pstmt.setString(4, cpf);
             pstmt.setString(5, telefone);
             pstmt.setString(6, endereco);
@@ -180,5 +183,99 @@ public class FuncionarioDAO {
         }
 
         return totalFuncionarios;
+    }
+
+    public static int loginFuncionarioDAO(Funcionario funcionarios) {//LOGIN DO CLIENTE *****************************************
+        Scanner scanner = new Scanner(System.in);
+
+        String senhaLogin, senha;
+        int idFuncionario = 0;
+        boolean usuarioExistente = true;
+
+        do {
+            do {
+                System.out.print("Digite o usuario: ");
+                funcionarios.usuario = scanner.nextLine().trim();
+
+                if (funcionarios.usuario.isEmpty()) {
+                    System.out.println("Usuário não pode ser vazio ou apenas espaços! Digite novamente.");
+                }
+            } while (funcionarios.usuario.isEmpty());
+
+            String sql = "SELECT id_funcionario FROM piramide.funcionarios WHERE usuario = ?";
+
+            try (Connection conn = ConexaoBD.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setString(1, funcionarios.usuario);
+
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    usuarioExistente = false;
+                    //pstmt.setInt(1, clientes.id_cliente);
+                    idFuncionario = rs.getInt("id_funcionario");
+                } else {
+                    System.out.println("Usuário incorreto! Digite novamente.");
+                }
+
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        } while (usuarioExistente);
+
+        usuarioExistente = true;
+
+        do {
+            Map<String, String> resultado = Criptografia();
+
+            funcionarios.senha = resultado.get("SenhaCriptografada");
+
+            String sql = "SELECT senha FROM piramide.funcionarios WHERE id_funcionario = ?";
+
+            try (Connection conn = ConexaoBD.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setInt(1, idFuncionario);
+
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    senhaLogin = rs.getString("senha");
+
+                    if(senhaLogin.equals(funcionarios.senha)){
+                        usuarioExistente = false;
+                    }else{
+                        System.out.println("Senha incorreta! Digite novamente.");
+                    }
+                }
+
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+        } while (usuarioExistente);
+
+        return idFuncionario;
+    }
+
+    public static void perfilFuncionario(int id) {//LOGIN DO CLIENTE *****************************************
+
+        String sql = "SELECT id_funcionario, nome_funcionario, usuario, cpf, telefone, endereco FROM piramide.funcionarios WHERE id_funcionario = " + id;
+        try (Connection conn = ConexaoBD.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                System.out.println("===========================");
+                System.out.println("Nome: " + rs.getString("nome_funcionario") +
+                        "\nUsuário: " + rs.getString("usuario") +
+                        "\nCPF: " + rs.getString("cpf") +
+                        "\nTelefone: " + rs.getString("telefone") +
+                        "\nEndereço: " + rs.getString("endereco"));
+            }
+            System.out.println("===========================");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

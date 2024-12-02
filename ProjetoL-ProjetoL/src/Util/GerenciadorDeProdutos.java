@@ -3,6 +3,7 @@ package Util;
 import Entidades.Produto;
 
 import static BancoDeDados.ProdutoDAO.*;
+import static BancoDeDados.ProdutoIngredienteDAO.selecionarIngrediente;
 import static Util.RevisarOpcao.simOuNao;
 
 import java.util.List;
@@ -22,25 +23,8 @@ public class GerenciadorDeProdutos {
         Produto novoProduto = new Produto();
         Scanner scanner = new Scanner(System.in);
 
-        checkadordeProdutosDAO(novoProduto);
-
-        do {
-            try {
-                System.out.print("Digite o estoque do produto: ");
-                String novoEstoqueString = scanner.nextLine();
-
-                Integer.parseInt(novoEstoqueString);
-
-                if (!novoEstoqueString.isEmpty()) {
-                    novoProduto.estoque = Integer.parseInt(novoEstoqueString); // Atu
-                    break;
-                } else if (novoProduto.estoque < 0) {
-                    System.out.println("Estoque não pode ser menor que 0! Digite novamente.");
-                }
-            } catch (NumberFormatException erro) {
-                System.out.println("[ERROR]");
-            }
-        } while (true);
+        String nome = checkadordeProdutosDAO(novoProduto);
+        novoProduto.estoque = 0;
 
         do {
             try {
@@ -60,8 +44,12 @@ public class GerenciadorDeProdutos {
             }
         } while (true);
 
+        System.out.println("\nDeseja adicionar o produto?");
+
         return novoProduto;
     }
+
+
 
     private static void checkadordeProdutos(Produto novoProduto, List<Produto> ProdutosExistentes) {//--------------------------------------
         Scanner scanner = new Scanner(System.in);
@@ -194,53 +182,52 @@ public class GerenciadorDeProdutos {
         produtoAtual.id_produto = id;
         checkadordeProdutosDAO(produtoAtual);
 
-            do {
-                try {
-                    System.out.print("Digite o novo estoque do produto: ");
-                    String estque = scanner.nextLine();
+        do {
+            try {
+                System.out.print("Digite o novo estoque do produto: ");
+                String estque = scanner.nextLine();
 
-                    Integer.parseInt(estque);
+                Integer.parseInt(estque);
 
-                    if (!estque.isEmpty()) {
-                        System.out.println(estque);
-                        System.out.println("\nConfirmar novo estoque?");
-                        simOuNao = simOuNao();
-                        if (simOuNao == 1) {
-                            produtoAtual.estoque = Integer.parseInt(estque);
-
-                            break;
-                        }
+                if (!estque.isEmpty()) {
+                    System.out.println(estque);
+                    System.out.println("\nConfirmar novo estoque?");
+                    simOuNao = simOuNao();
+                    if (simOuNao == 1) {
+                        produtoAtual.estoque = Integer.parseInt(estque);
+                        break;
                     }
-                } catch (NumberFormatException erro) {
-                    System.out.println("[ERROR]");
                 }
-            } while(true);
+            } catch (NumberFormatException erro) {
+                System.out.println("[ERROR]");
+            }
+        } while(true);
 
-            System.out.println("\nProduto atual: " + produtoAtual);
+        System.out.println("\nProduto atual: " + produtoAtual);
 
-            do {
+        do {
 
-                try {
-                    System.out.print("Digite o novo preço do produto: ");
-                    String preco = scanner.nextLine();
+            try {
+                System.out.print("Digite o novo preço do produto: ");
+                String preco = scanner.nextLine();
 
-                    Double.parseDouble(preco);
+                Double.parseDouble(preco);
 
-                    if (!preco.isEmpty()) {
-                        System.out.println(preco);
-                        System.out.println("\nConfirmar novo preço?");
-                        simOuNao = simOuNao();
-                        if (simOuNao == 1) {
-                            produtoAtual.preco = Double.parseDouble(preco);
-                            break;
-                        }
+                if (!preco.isEmpty()) {
+                    System.out.println(preco);
+                    System.out.println("\nConfirmar novo preço?");
+                    simOuNao = simOuNao();
+                    if (simOuNao == 1) {
+                        produtoAtual.preco = Double.parseDouble(preco);
+                        break;
                     }
-                } catch (NumberFormatException erro) {
-                    System.out.println("[ERROR]");
                 }
-            } while (true);
-            System.out.println("Produto editado com sucesso!");
-            return produtoAtual;
+            } catch (NumberFormatException erro) {
+                System.out.println("[ERROR]");
+            }
+        } while (true);
+        System.out.println("Produto editado com sucesso!");
+        return produtoAtual;
 
     }
 

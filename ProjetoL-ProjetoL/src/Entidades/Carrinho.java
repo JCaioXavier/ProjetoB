@@ -1,14 +1,11 @@
 package Entidades;
 
 public class Carrinho {
-    public int id_item;
-    public int id_produtoC;
-    public String nomeC;
-    public double precoC;
-
-    public String toString() {
-        return "\nItem: " + id_item + "\n" +
-                "Nome: " + nomeC + "\n" +
-                "Preço: " + precoC + "\n";
-    }
+    public int id_carrinho;
+    public int id_cliente;
+    public int id_funcionario;
+    public int id_produto;
+    public int quantidade;
+    public double preco;
+    public double total;
 }

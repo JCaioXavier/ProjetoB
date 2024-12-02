@@ -20,11 +20,13 @@ public class GerenciadorDeMesas {
         addMesa.id_mesa = mesas.size();
 
         System.out.println("Número de itens no carrinho: " + listaCarrinho.size());
-
+/*
         for (int i = 0; i < listaCarrinho.size(); i++) {
             addMesa.produtos.add(listaCarrinho.get(i).nomeC); // Adiciona o produto à lista
             System.out.println("Produto adicionado: " + listaCarrinho.get(i).nomeC);
         }
+
+ */
 
         addMesa.total = total;
 

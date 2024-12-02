@@ -9,7 +9,6 @@ import java.util.Scanner;
 import static Util.DadosEstaticos.gerarProduto;
 
 public class GerenciadorDeCarrinho {
-
     public static List<Carrinho> adicionarProduto(List<Carrinho> comprarProduto, int i) {//-------------------------------
         Carrinho addProduto = new Carrinho();
         int id = comprarProduto.size();
@@ -18,12 +17,12 @@ public class GerenciadorDeCarrinho {
 
         comprarProduto.add(addProduto);
 
-        addProduto.id_item = id + 1;
-        addProduto.id_produtoC = produtos.get(i).id_produto;
-        addProduto.nomeC = produtos.get(i).nome;
-        addProduto.precoC = produtos.get(i).preco;
+        addProduto.id_produto = id + 1;
+        addProduto.id_produto = produtos.get(i).id_produto;
+        addProduto.id_produto = produtos.get(i).id_produto;
+        addProduto.preco = produtos.get(i).preco;
 
-        System.out.println("Produto adicionado: " + addProduto.nomeC);
+        System.out.println("Produto adicionado: " + addProduto.id_produto);
 
         return comprarProduto;
     }
@@ -34,7 +33,7 @@ public class GerenciadorDeCarrinho {
 
             // Atualiza os IDs dos produtos após a remoção
             for (int i = 0; i < carrininho.size(); i++) {
-                carrininho.get(i).id_item = i + 1;
+                carrininho.get(i).id_produto = i + 1;
             }
             System.out.println("Produto removido com sucesso!");
         } else {
@@ -64,7 +63,7 @@ public class GerenciadorDeCarrinho {
         double total = 0;
 
         for (int i = 0; i < carrininho.size(); i++) {
-            total += carrininho.get(i).precoC;
+            total += carrininho.get(i).preco;
         }
         return total;
     }

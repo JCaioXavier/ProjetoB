@@ -1,95 +1,32 @@
 //Gerenciador de Clientes
 package Util;
 
-import BancoDeDados.ClienteDAO.*;
+import BancoDeDados.ConexaoBD;
 import Entidades.Cliente;
-import Entidades.Funcionario;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import static BancoDeDados.ClienteDAO.*;
+import static BancoDeDados.CriptografiaDAO.Criptografia;
 
 
 public class GerenciadorDeClientes {
     private static int contadorClientes = 2;
 
     public static void confirmarDadosClientes(Cliente cliente) { //PEDE A CONFIRMAÇÃO DOS DADOS ************************
-        System.out.println("Seus dados estão corretos?\n" +
+        System.out.println("\n" +
+                "Seus dados estão corretos?\n" +
+                "===========================\n" +
                 "Usuário: " + cliente.usuario + "\n" +
                 "Senha: " + cliente.senha + "\n" +
                 "Nome: " + cliente.nome + "\n" +
                 "CPF: " + cliente.cpf + "\n" +
                 "Telefone: " + cliente.telefone + "\n" +
-                "Endereço: " + cliente.endereco + "\n");
-    }
-
-    public static Cliente cadastrarCliente(List<Cliente> clientesExistentes) {//CADASTRAR NOVO CLIENTE ******************
-        Cliente novoCliente = new Cliente();
-        Scanner scanner = new Scanner(System.in);
-
-
-        checkadorDeClienteDAO(novoCliente);// Passando a lista de clientes existentes
-
-        do {
-            System.out.print("Digite sua senha: ");
-            novoCliente.senha = scanner.nextLine();
-
-            while (novoCliente.senha.length() > 50) {
-                System.out.println("[ERROR] Senha não pode ser maior que 50 caracteres.");
-                System.out.print("Digite sua senha: ");
-                novoCliente.senha = scanner.nextLine();
-            }
-            if (novoCliente.senha.isEmpty()) {
-                System.out.println("[ERROR]Senha não pode ser vazio ou apenas espaços!");
-            }
-        } while (novoCliente.senha.isEmpty());
-
-        do {
-            System.out.print("Digite seu nome: ");
-            novoCliente.nome = scanner.nextLine();
-
-            while (novoCliente.nome.length() > 100) {
-                System.out.println("[ERROR] Nome não pode ser maior que 100 caracteres.");
-                System.out.print("Digite sua senha: ");
-                novoCliente.senha = scanner.nextLine();
-            }
-            if (novoCliente.nome.isEmpty()) {
-                System.out.println("[ERROR] Nome não pode ser vazio ou apenas espaços!");
-            }
-        } while (novoCliente.nome.isEmpty());
-
-        System.out.print("Digite seu CPF: ");
-        novoCliente.cpf = scanner.nextLine();
-
-        while (novoCliente.cpf.length() != 11) {
-            System.out.println("[ERROR] CPF tem que ser igual a 11 digitos.");
-            System.out.print("Digite seu CPF: ");
-            novoCliente.cpf = scanner.nextLine();
-        }
-
-        System.out.print("Digite seu telefone: ");
-        novoCliente.telefone = scanner.nextLine();
-
-        while (novoCliente.telefone.length() < 9 || novoCliente.telefone.length() > 11) {
-            System.out.println("[ERROR] Telefone tem que ter ao menos 9 digitos.");
-            System.out.print("Digite seu telefone: ");
-            novoCliente.telefone = scanner.nextLine();
-        }
-
-        do {
-            System.out.print("Digite seu endereço: ");
-            novoCliente.endereco = scanner.nextLine();
-
-            while (novoCliente.endereco.length() > 100) {
-                System.out.println("[ERROR] Endereço não pode ser maior que 100 caracteres.");
-                System.out.print("Digite seu endereço: ");
-                novoCliente.endereco = scanner.nextLine();
-            }
-            if (novoCliente.endereco.isEmpty()) {
-                System.out.println("[ERROR] Endereço não pode ser vazio ou apenas espaços!");
-            }
-        } while (novoCliente.endereco.isEmpty());
-
-        return novoCliente;
+                "Endereço: " + cliente.endereco + "\n" +
+                "===========================");
     }
 
     private static void checkadordeClientes(Cliente novoCliente, List<Cliente> clientesExistentes) { //VERIFICA SE USUÁRIO JA EXISTE ***
@@ -156,27 +93,47 @@ public class GerenciadorDeClientes {
         return loginCliente.id_cliente;
     }
 
-    public static Cliente editarCliente(List<Cliente> clientes, int indexCliente) {
+    public static Cliente editarCliente(int id) {
         Scanner scanner = new Scanner(System.in);
-        Cliente clienteAtual = clientes.get(indexCliente - 1);
+        Cliente clienteAtual = new Cliente();
 
-        System.out.println("\nUsuário atual: " + clienteAtual);// mostra as informações do clientes escolhido
+        boolean usuarioExistente = true;
 
-        checkadordeClientes(clienteAtual, clientes);
+        String senhaLogin, senha;
+
+        clienteAtual.id_cliente = id;
+
+        checkadorDeClienteDAO(clienteAtual);
 
         do {
-            System.out.print("Digite a nova senha: ");
-            clienteAtual.senha = scanner.nextLine();
+            Map<String, String> resultado = Criptografia();
 
-            if (clienteAtual.senha.length() > 50) {
-                System.out.println("[ERROR] Senha não pode ser maior que 50 caracteres.");
-                System.out.print("Digite sua nova senha: ");
-                clienteAtual.senha = scanner.nextLine();
+            clienteAtual.senha = resultado.get("SenhaCriptografada");
+            senha = resultado.get("senha");
+
+            String sql = "SELECT senha FROM piramide.clientes WHERE id_cliente = ?";
+
+            try (Connection conn = ConexaoBD.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setInt(1, id);
+
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    senhaLogin = rs.getString("senha");
+
+                    if(senhaLogin.equals(clienteAtual.senha)){
+                        usuarioExistente = false;
+                    }else{
+                        System.out.println("Senha incorreta! Digite novamente.");
+                    }
+                }
+
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
             }
-            if (clienteAtual.senha.isEmpty()) {
-                System.out.println("[ERROR]Senha não pode ser vazio ou apenas espaços!");
-            }
-        } while (clienteAtual.senha.isEmpty());
+        } while (usuarioExistente);
 
         do {
             System.out.print("Digite seu nome: ");
@@ -226,9 +183,17 @@ public class GerenciadorDeClientes {
 
         System.out.println("\nUsuário atual: " + clienteAtual);
 
-        System.out.println("\nUsuário editado com sucesso!");
+        System.out.println("\nUsuário atual: " +
+                "===========================" +
+                "Usuario: " + clienteAtual.usuario + "\n" +
+                "Senha: " + senha + "\n" +
+                "Nome: " + clienteAtual.nome + "\n" +
+                "Cpf: " + clienteAtual.cpf + "\n" +
+                "Endereço: " + clienteAtual.endereco + "\n" +
+                "Telefone: " + clienteAtual.telefone + "\n");
+        System.out.println("===========================");
 
-        return  clienteAtual;
+        return clienteAtual;
     }
 
     public static int opcaoMenuCliente() {//OPÇÃO MENU DO ADMINISTRADOR ---------------------------------------------------
