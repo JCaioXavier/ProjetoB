@@ -1,4 +1,4 @@
-package Pano;
+package Tapete;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,30 +151,6 @@ public class Poeira {
 
                             while (adicionarProduto) {
 
-                                //adicionarCarrinhoClienteDAO(idLoginCliente);
-                                AAAAAAAAAAAAAAA(idLoginCliente);
-
-                                carrinhoClienteDAO(idLoginCliente);
-
-                                System.out.println("Deseja adicionar outro item?");
-                                System.out.println("""
-                                        1 | SIM
-                                        2 | NÃO
-                                        3 | VOLTAR""");
-
-                                int opcao = opcaoPadraoUmATres();
-
-                                if (opcao == 2) {
-                                    adicionarProduto = false;
-                                } else if (opcao == 3) {
-                                    opcaoVoltar = true;
-                                    adicionarProduto = false;
-                                    menuCliente = false;
-                                }
-                            }
-
-                                /*
-
                                 adicionarCarrinhoClienteDAO(idLoginCliente);
 
                                 carrinhoClienteDAO(idLoginCliente);
@@ -196,13 +172,15 @@ public class Poeira {
                                 }
                             }
 
-                                 */
-
                             if (!menuCliente) {
                                 break;
                             }
 
-                            carrinhoClienteDAO(idLoginCliente);
+                            int retorno = carrinhoClienteDAO(idLoginCliente);
+
+                            if(retorno == 1){
+                                break;
+                            }
 
                             System.out.println("Deseja editar o pedido?");
                             simOuNao = simOuNao();
@@ -218,7 +196,6 @@ public class Poeira {
                                     menuAdicionarProduto = false;
                                 } else if (opcao == 2) {
                                     carrinhoClienteDAO(idLoginCliente);
-                                    System.out.println("Qual item do carrinho deseja remover? ");
                                     subtrairTotal = removerItemCarrinhoClienteDAO(idLoginCliente);//
                                     totalCarrinhoSubtrairClienteDAO(idLoginCliente, subtrairTotal);
                                     opcaoVoltar = true;
@@ -403,7 +380,11 @@ public class Poeira {
                                 break;
                             }
 
-                            carrinhoFuncionarioDAO(idLoginFuncionario);
+                            int retorno = carrinhoFuncionarioDAO(idLoginFuncionario);
+
+                            if(retorno == 1){
+                                break;
+                            }
 
                             System.out.println("Deseja editar o pedido?");
                             simOuNao = simOuNao();
@@ -419,9 +400,8 @@ public class Poeira {
                                     menuAdicionarProduto = false;
                                 } else if (opcao == 2) {
                                     carrinhoFuncionarioDAO(idLoginFuncionario);
-                                    System.out.println("Qual item do carrinho deseja remover? ");
-                                    subtrairTotal = removerItemCarrinhoClienteDAO(idLoginFuncionario);
-                                    totalCarrinhoSubtrairFuncionarioDAO(idLoginCliente, subtrairTotal);
+                                    subtrairTotal = removerItemCarrinhoFuncionarioDAO(idLoginFuncionario);
+                                    totalCarrinhoSubtrairFuncionarioDAO(idLoginFuncionario, subtrairTotal);
                                     opcaoVoltar = true;
                                 }
                             } else {

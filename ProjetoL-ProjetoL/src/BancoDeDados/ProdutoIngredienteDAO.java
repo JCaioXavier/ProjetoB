@@ -273,12 +273,11 @@ public class ProdutoIngredienteDAO {
         return 2;
     }*/
     public static int verificarPi(int produto, int quantidade) {
-
         String sql = """
             SELECT pi.id_ingrediente, pi.quantidade AS qtd_ingrediente, 
                    i.estoque AS estoque_ingrediente
             FROM piramide.produtos_ingredientes pi
-            JOIN temp_ingredientes i ON i.id_ingrediente = pi.id_ingrediente
+            JOIN piramide.carrinhos_ingredientes i ON i.id_ingrediente = pi.id_ingrediente
             WHERE pi.id_produto = ?
             """;
 
@@ -297,12 +296,8 @@ public class ProdutoIngredienteDAO {
                         int qtdIngredientePorProduto = rsIngredientes.getInt("qtd_ingrediente");
                         int estoqueIngrediente = rsIngredientes.getInt("estoque_ingrediente");
 
-                        // Calcula a quantidade máxima possível com este ingrediente
-                        int quantidadePorIngrediente = estoqueIngrediente / qtdIngredientePorProduto; // 1
 
-                        System.out.println(qtdIngredientePorProduto);
-                        System.out.println(estoqueIngrediente);
-                        System.out.println(quantidadePorIngrediente);
+                        int quantidadePorIngrediente = estoqueIngrediente / qtdIngredientePorProduto;
 
                         // Se for o primeiro ingrediente, inicializa a quantidade máxima
                         if (primeiroIngrediente) {
@@ -315,7 +310,11 @@ public class ProdutoIngredienteDAO {
                         }
                     }
 
+
                     if (quantidade > quantidadeMaximaDisponivel) {
+                        if(quantidadeMaximaDisponivel == 0){
+                            return 3;
+                        }
                         System.out.println("Só está disponível adicionar " + quantidadeMaximaDisponivel + " no momento.");
                         return 2;
                     }else{
@@ -328,251 +327,7 @@ public class ProdutoIngredienteDAO {
             }
             return -1;
     }
-
-    public void processarPedido(int idCarrinho) {
-        try (Connection conn = ConexaoBD.getConnection()) {
-            conn.setAutoCommit(false); // Inicia uma transação
-
-            // Cria a tabela temporária
-            criarTabelaTemporaria(conn);
-
-            // Preenche a tabela temporária com os estoques atuais
-            preencherTabelaTemporaria(conn);
-
-            // Simula a retirada dos ingredientes na tabela temporária
-            if (!simularRetirada(conn, idCarrinho)) {
-                System.out.println("Pedido não processado devido à falta de ingredientes.");
-                conn.rollback();
-                return;
-            }
-
-            // Aplica as alterações na tabela real de ingredientes
-            atualizarEstoqueReal(conn, idCarrinho);
-
-            conn.commit(); // Finaliza a transação
-            System.out.println("Pedido processado com sucesso.");
-
-        } catch (SQLException e) {
-            System.err.println("Erro ao processar pedido: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private void criarTabelaTemporaria(Connection connection) throws SQLException {
-        String sql = """
-            CREATE TEMP TABLE temp_ingredientes AS
-            SELECT id_ingrediente, quantidade
-            FROM piramide.ingredientes
-        """;
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.executeUpdate();
-            System.out.println("Tabela temporária criada.");
-        }
-    }
-
-    private void preencherTabelaTemporaria(Connection connection) throws SQLException {
-        String sql = """
-            INSERT INTO temp_ingredientes (id_ingrediente, quantidade)
-            SELECT id_ingrediente, quantidade
-            FROM piramide.ingredientes
-        """;
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.executeUpdate();
-            System.out.println("Tabela temporária preenchida.");
-        }
-    }
-
-    private boolean simularRetirada(Connection connection, int idCarrinho) throws SQLException {
-        String sqlUpdate = """
-            UPDATE temp_ingredientes ti
-            SET quantidade = quantidade - (
-                SELECT SUM(pi.quantidade * c.quantidade)
-                FROM piramide.produtos_ingredientes pi
-                JOIN piramide.carrinhos c ON c.id_produto = pi.id_produto
-                WHERE c.id_carrinho = ? AND pi.id_ingrediente = ti.id_ingrediente
-            )
-            WHERE EXISTS (
-                SELECT 1
-                FROM piramide.produtos_ingredientes pi
-                JOIN piramide.carrinhos c ON c.id_produto = pi.id_produto
-                WHERE c.id_carrinho = ? AND pi.id_ingrediente = ti.id_ingrediente
-            )
-        """;
-
-        String sqlCheck = """
-            SELECT id_ingrediente
-            FROM temp_ingredientes
-            WHERE quantidade < 0
-        """;
-
-        try (PreparedStatement updateStmt = connection.prepareStatement(sqlUpdate);
-             PreparedStatement checkStmt = connection.prepareStatement(sqlCheck)) {
-            updateStmt.setInt(1, idCarrinho);
-            updateStmt.setInt(2, idCarrinho);
-            updateStmt.executeUpdate();
-
-            try (ResultSet rs = checkStmt.executeQuery()) {
-                if (rs.next()) {
-                    System.out.println("Falta de estoque para o ingrediente: " + rs.getInt("id_ingrediente"));
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    private void atualizarEstoqueReal(Connection connection, int idCarrinho) throws SQLException {
-        String sql = """
-            UPDATE piramide.ingredientes i
-            SET quantidade = quantidade - (
-                SELECT SUM(pi.quantidade * c.quantidade)
-                FROM piramide.produtos_ingredientes pi
-                JOIN piramide.carrinhos c ON c.id_produto = pi.id_produto
-                WHERE c.id_carrinho = ? AND pi.id_ingrediente = i.id_ingrediente
-            )
-            WHERE EXISTS (
-                SELECT 1
-                FROM piramide.produtos_ingredientes pi
-                JOIN piramide.carrinhos c ON c.id_produto = pi.id_produto
-                WHERE c.id_carrinho = ? AND pi.id_ingrediente = i.id_ingrediente
-            )
-        """;
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, idCarrinho);
-            stmt.setInt(2, idCarrinho);
-            int rowsUpdated = stmt.executeUpdate();
-            System.out.println("Estoque atualizado para " + rowsUpdated + " ingredientes.");
-        }
-    }
-
-    public static void teste(){
-        String sql = "SELECT id_produto, id_ingrediente, quantidade FROM piramide.produtos_ingredientes WHERE id_produto = ?";
-
-        int idProduto = 0, idIngrediente = 0, idQuantidade = 0, tamanho = 0;
-
-        try (Connection conn = ConexaoBD.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, idProduto);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    idProduto = rs.getInt("id_produto");
-                    idQuantidade = rs.getInt("quantidade");
-                    idIngrediente = rs.getInt("id_ingrediente");
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Erro ao obter tamanho do pedido: " + e.getMessage());
-        }
-
-        sql = "SELECT COUNT(*) AS tamanho FROM piramide.produtos_ingredientes WHERE id_produto = ?";
-
-        try (Connection conn = ConexaoBD.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, idProduto);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    tamanho = rs.getInt("tamanho");
-
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Erro ao obter tamanho do pedido: " + e.getMessage());
-        }
-
-        for(int i = 1; i  <= tamanho; i++){
-
-            sql = "SELECT numero_linha, id_produto, quantidade, id_ingrediente " +
-                    "FROM ( " +
-                    "    SELECT ROW_NUMBER() OVER (ORDER BY id_produto_ingrediente ASC) AS numero_linha, " +
-                    //CRIA UMA TABELA TEMPORARIA COM O NOME NUMERO_LINHA PARA FICAR MAIS FÁCIL DE CONTROLAR JÁ Q A GENTE N TEM ID SERIAL PARA SE BASEAR
-                    "           id_produto, quantidade " +
-                    //PEGA O ID_PRODUTO E QUANTIDADE
-                    "    FROM piramide.produtos_ingredientes " +
-                    "    WHERE id_produto = ? " +
-                    ") AS subquery " +
-                    "WHERE numero_linha = ?";
-            //FAZ O COMPARATIVO ENTRE ID_PEDIDO E NUMERO DA LINHA (SUBQUERY PQ ESSA TABELA É TEMPORARIA)
-
-            try (Connection conn = ConexaoBD.getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-                pstmt.setInt(1, idProduto);
-                pstmt.setInt(2, i);
-                //NUMERO DA LINHA PRA COMPARAR
-
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        int id_produto = rs.getInt("id_produto");
-                        //PEGA O ID
-                        int quantidade = rs.getInt("quantidade");
-                        //PEGA A QUANTIDADE
-
-
-                        //FUNÇÃO PARA ALTERAR O ESTOQUE
-                    }
-                }
-            } catch (SQLException e) {
-                System.out.println("Erro no a: " + e.getMessage());
-            }
-        }
-
-
-    }
-
-
-
-
 }
-
-
-    /*public static void darbaixa(int idCarrinho){
-        // Primeiro, faça a consulta para pegar todos os produtos e seus ingredientes do carrinho
-        String selectCarrinhoSql = "SELECT c.id_produto, c.quantidade AS qtd_produto, pi.id_ingrediente, pi.quantidade AS qtd_ingrediente " +
-                "FROM piramide.carrinhos c " +
-                "JOIN piramide.produtos_ingredientes pi ON pi.id_produto = c.id_produto " +
-                "WHERE c.id_carrinho = ?";
-
-        try (Connection conn = ConexaoBD.getConnection();
-             PreparedStatement selectCarrinhoStmt = conn.prepareStatement(selectCarrinhoSql)){
-            // Define o parâmetro da consulta
-            selectCarrinhoStmt.setInt(1, idCarrinho);  // idCarrinho é o ID do carrinho do qual você quer obter os produtos
-
-            ResultSet rs = selectCarrinhoStmt.executeQuery();
-
-            while (rs.next()) {
-                int idIngrediente = rs.getInt("id_ingrediente");
-                int qtdIngrediente = rs.getInt("qtd_ingrediente");
-                int qtdProduto = rs.getInt("qtd_produto");
-
-                // Calcule a quantidade que será subtraída do estoque
-                int quantidadeAserSubtraida = qtdIngrediente * qtdProduto;
-
-                // Prepara a consulta SQL para o UPDATE
-                String updateSql = "UPDATE piramide.ingredientes i " +
-                        "SET quantidade = quantidade - ? " +
-                        "FROM piramide.produtos_ingredientes pi " +
-                        "JOIN piramide.produtos p ON p.id_produto = pi.id_produto " +
-                        "WHERE i.id_ingrediente = pi.id_ingrediente " +
-                        "AND p.id_produto = ?";
-                PreparedStatement updateStmt = conn.prepareStatement(updateSql);
-                updateStmt.setInt(1, quantidadeAserSubtraida);  // Quantidade a ser subtraída do estoque
-                updateStmt.setInt(2, rs.getInt("id_produto"));  // ID do produto correspondente ao ingrediente
-
-                // Executa o UPDATE para o ingrediente associado ao produto no carrinho
-                updateStmt.executeUpdate();
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }*/
 
 
 

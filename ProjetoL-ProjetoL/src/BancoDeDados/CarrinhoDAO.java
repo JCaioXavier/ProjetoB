@@ -11,17 +11,12 @@ import java.util.Scanner;
 
 import static BancoDeDados.DetalhePedidoDAO.*;
 import static BancoDeDados.ProdutoDAO.*;
-import static BancoDeDados.ProdutoIngredienteDAO.verificarPi;
 import static Util.RevisarOpcao.simOuNao;
 
 public class CarrinhoDAO {
-    public static void carrinhoClienteDAO(int idCliente) {
-        String sql = "SELECT dp.id_carrinho, p2.nome_produto, dp.quantidade, dp.preco " +
-                "FROM piramide.clientes c " +
-                "JOIN piramide.carrinhos dp ON dp.id_cliente = c.id_cliente " +
-                "JOIN piramide.produtos p2 ON p2.id_produto = dp.id_produto " +
-                "WHERE c.id_cliente = ? " +
-                "ORDER BY dp.id_carrinho ASC";
+    public static int carrinhoClienteDAO(int idCliente) {
+        int idCarrinho = 0, condição = 0;
+        String sql = "SELECT id_carrinho FROM piramide.carrinhos WHERE id_cliente = ?";
 
         try (Connection conn = ConexaoBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -29,18 +24,44 @@ public class CarrinhoDAO {
             stmt.setInt(1, idCliente);
 
             ResultSet rs = stmt.executeQuery();
-            //System.out.println("\nPedido: " + rs.getInt("id_pedido") +
-            //" Data: " + rs.getDate("data_pedido"));
-            while (rs.next()) {
-                System.out.println("===========================");
-                System.out.println("Produto: " + rs.getString("nome_produto") +
-                        "\nQuantidade: " + rs.getInt("quantidade") +
-                        "\nPreço Unitário: " + rs.getDouble("preco"));
+
+            if (rs.next()) {
+                idCarrinho = rs.getInt("id_carrinho");
+
+                condição = 1;
             }
-            System.out.println("===========================");
+
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+
+        if(condição == 1){
+            sql = "SELECT dp.id_carrinho, p2.nome_produto, dp.quantidade, dp.preco " +
+                    "FROM piramide.clientes c " +
+                    "JOIN piramide.carrinhos dp ON dp.id_cliente = c.id_cliente " +
+                    "JOIN piramide.produtos p2 ON p2.id_produto = dp.id_produto " +
+                    "WHERE c.id_cliente = ? " +
+                    "ORDER BY dp.id_carrinho ASC";
+
+            try (Connection conn = ConexaoBD.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                // Define o parâmetro da consulta
+                stmt.setInt(1, idCliente);
+
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    System.out.println("===========================");
+                    System.out.println("Produto: " + rs.getString("nome_produto") +
+                            "\nQuantidade: " + rs.getInt("quantidade") +
+                            "\nPreço Unitário: " + rs.getDouble("preco"));
+                }
+                System.out.println("===========================");
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+            return 2;
+        }
+        return 1;
     }
 
     public static int pegarCarrinhoClienteDAO(int idCliente) {
@@ -181,108 +202,6 @@ public class CarrinhoDAO {
         Carrinho novoCarrinho = new Carrinho();
         Scanner scanner = new Scanner(System.in);
 
-        int checkador = 0, item, quantidade = 0, positivo, Condicao = 0, quantidadeSELECT = 0, condiçãoB = 0, opqmpc = 0;
-        double total = 0, preco = 0, opcsd = 0, subtrairTotal = 0;
-        boolean loop = true, loop1 = true;
-
-        novoCarrinho.id_cliente = idCliente;
-
-        while (loop) {
-            try {
-                System.out.println("Produtos disponíveis:");
-                produtosDAO();
-
-                System.out.println("Selecione o número do item que deseja adicionar no pedido: ");
-                item = pegarPedidoProdutoDAO();
-
-                opqmpc = quantidadeMaximaProdutoCarrinhoCliente(item, idCliente);//  0
-
-                int identificar = verificarPi(item, opqmpc); // 1
-
-
-                if (opqmpc == 2) {
-                    //opcsd = carrinhoSemDuplicataCliente(item, idCliente);
-                }else if(opqmpc == 0 && identificar == 0){
-                    System.out.println("Produto indisponivel!");
-                    break;
-                }
-
-
-
-
-
-                System.out.print("Qual a quantidade desse item no pedido? ");
-                quantidade = Integer.parseInt(scanner.nextLine());
-
-                if(quantidade <= 0){
-                    System.out.println("Quantidade inválida. Deve ser maior que zero.");
-                    Condicao = 0;
-                }
-
-                if (opqmpc == 0 && identificar == 1){
-                    checkador = verificarPi(item, quantidade);
-                    if (checkador == 2){
-                        Condicao = 0;
-                    }else {
-                        Condicao = 1;
-                    }
-                }
-
-
-                if (Condicao == 1) {
-                    System.out.println("\nTem certeza que deseja adicionar " + quantidade + " unidades desse item ao pedido?");
-                    int confirmacao = simOuNao();
-
-                    if (confirmacao == 1) {
-                        novoCarrinho.id_produto = item;
-                        novoCarrinho.quantidade = quantidade;
-
-
-                        loop = false;
-                    }
-                }
-
-            } catch (NumberFormatException e) {
-                // Tratamento de entrada inválida (letras, caracteres especiais, etc.)
-                System.out.println("Entrada inválida. Por favor, insira um número válido.");
-            } catch (Exception e) {
-                // Tratamento genérico para outros erros
-                System.out.println("Ocorreu um erro: " + e.getMessage());
-            }
-        }
-
-        if (Condicao == 1) {
-            preco = pegarPedidoPrecoDAO(novoCarrinho.id_produto);
-            novoCarrinho.preco = preco;
-
-            total = totalCarrinhoClienteDAO(idCliente);
-
-            String sql = "INSERT INTO piramide.carrinhos (id_produto, quantidade, preco, id_cliente, total) VALUES (?, ?, ?, ?, ?)";
-            try (Connection conn = ConexaoBD.getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-                pstmt.setInt(1, novoCarrinho.id_produto);
-                pstmt.setInt(2, novoCarrinho.quantidade);
-                pstmt.setDouble(3, novoCarrinho.preco);
-                pstmt.setInt(4, novoCarrinho.id_cliente);
-                pstmt.setDouble(5, novoCarrinho.preco = (novoCarrinho.preco * quantidade) + total);
-
-                int rowsAffected = pstmt.executeUpdate();
-                if (rowsAffected > 0) {
-                    System.out.println("Produto inserido com sucesso no pedido!");
-                } else {
-                    System.out.println("Nenhuma linha foi inserida. Verifique os dados.");
-                }
-            } catch (SQLException e) {
-                System.err.println("Erro ao inserir o pedido1: " + e.getMessage());
-            }
-        }
-    }
-
-    public static void AAAAAAAAAAAAAAA(int idCliente) {
-        Carrinho novoCarrinho = new Carrinho();
-        Scanner scanner = new Scanner(System.in);
-
         int checkador = 0, item, quantidade = 0, positivo, Condicao = 0, quantidadeSELECT = 0, resposta = 0;
         double total = 0, preco = 0, opcsd = 0, opqmpc = 0, subtrairTotal = 0;
         boolean loop = true;
@@ -298,7 +217,7 @@ public class CarrinhoDAO {
                     System.out.println("Selecione o número do item que deseja adicionar no pedido: ");
                     item = pegarPedidoProdutoDAO();
 
-                    int retorno = selectEstoqueProduto(item, idCliente);
+                    int retorno = selectEstoqueProdutoCliente(item, idCliente);
 
                     if(retorno == 1){
                         loop = false;
@@ -894,8 +813,8 @@ public class CarrinhoDAO {
         Carrinho novoCarrinho = new Carrinho();
         Scanner scanner = new Scanner(System.in);
 
-        int checkador = 0, item, quantidade = 0, positivo, Condicao = 0, quantidadeSELECT = 0;
-        double total = 0, preco = 0, opcsd = 0, opqmpc = 0;
+        int checkador = 0, item, quantidade = 0, positivo, Condicao = 0, quantidadeSELECT = 0, resposta = 0;
+        double total = 0, preco = 0, duplicata = 0, quantidadeMax = 0, subtrairTotal = 0;
         boolean loop = true;
 
         novoCarrinho.id_funcionario = idFuncionario;
@@ -909,16 +828,24 @@ public class CarrinhoDAO {
                     System.out.println("Selecione o número do item que deseja adicionar no pedido: ");
                     item = pegarPedidoProdutoDAO();
 
-                    opqmpc = quantidadeMaximaProdutoCarrinhoFuncionario(item, idFuncionario);
+                    int retorno = selectEstoqueProdutoFuncionario(item, idFuncionario);
 
-                    if(opqmpc == 2){
-                        opcsd = carrinhoSemDuplicataFuncionario(item, idFuncionario);
-                    }
-
-                    if(opcsd == 1){
+                    if(retorno == 1){
                         loop = false;
                         break;
-                    }else if(opcsd == 2){
+                    }
+
+                    quantidadeMax = quantidadeMaximaProdutoCarrinhoFuncionario(item, idFuncionario);
+
+                    if(quantidadeMax == 2){
+                        duplicata = carrinhoSemDuplicataFuncionario(item, idFuncionario);
+
+                    }
+
+                    if(duplicata == 1){
+                        loop = false;
+                        break;
+                    }else if(duplicata == 2){
                         Condicao = 1;
                         novoCarrinho.id_produto = item;
 
@@ -926,8 +853,6 @@ public class CarrinhoDAO {
                         quantidade = Integer.parseInt(scanner.nextLine());
 
                         checkador = checkadorEstoque(item, quantidade, quantidadeSELECT);
-                        //PEGA O ID DO PRODUTO E A QUANTIDADE INFORMADA PELO USUARIO E CHECKA SE TEM ESTOQUE DE DETERMINADA QUANTIA
-                        //CASO TENHA, RETORNA 1, CASO NÃO, RETORNA 2
 
                         if (quantidade <= 0) {
                             System.out.println("Quantidade inválida. Deve ser maior que zero.");
@@ -959,7 +884,7 @@ public class CarrinhoDAO {
             preco = pegarPedidoPrecoDAO(novoCarrinho.id_produto);
             novoCarrinho.preco = preco;
 
-            total = totalCarrinhoFuncionarioDAO(idFuncionario);
+            total = totalCarrinhoClienteDAO(idFuncionario);
 
             String sql = "INSERT INTO piramide.carrinhos (id_produto, quantidade, preco, id_funcionario, total) VALUES (?, ?, ?, ?, ?)";
             try (Connection conn = ConexaoBD.getConnection();
@@ -985,9 +910,10 @@ public class CarrinhoDAO {
 
     public static double removerItemCarrinhoFuncionarioDAO(int idFuncionario) {
         Scanner scan = new Scanner(System.in);
-        int linhaCarrinho = 0, itemIndex = 0, idItemCarrinho = 0, quantidade;
-        double total = 0, preco = 0, totalFinal = 0;
+        int linhaCarrinho = 0, itemIndex = 0, idItemCarrinho = 0, quantidadeMaximaDisponivel = 0, idProduto = 0, quantidade = 0;
+        double totalFinal = 0;
 
+        // Consulta para verificar a quantidade de itens no carrinho
         String sql = "SELECT COUNT(*) FROM piramide.carrinhos WHERE id_funcionario = ?";
 
         try (Connection conn = ConexaoBD.getConnection();
@@ -1002,9 +928,29 @@ public class CarrinhoDAO {
 
         } catch (SQLException e) {
             System.out.println("Erro ao consultar o banco: " + e.getMessage());
+            return 0;
         }
 
-        if(linhaCarrinho > 0){
+        if (linhaCarrinho > 0) {
+
+            // Exibe os itens no carrinho
+            sql = "SELECT id_carrinho FROM piramide.carrinhos WHERE id_funcionario = ?";
+            try (Connection conn = ConexaoBD.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+                pstmt.setInt(1, idFuncionario);
+                ResultSet rs = pstmt.executeQuery();
+
+                while (rs.next()) {
+                    rs.getInt("id_carrinho");
+                }
+
+            } catch (SQLException e) {
+                System.out.println("Erro ao listar itens do carrinho: " + e.getMessage());
+                return 0;
+            }
+
+            System.out.print("Selecione o número do item para remover: ");
             itemIndex = scan.nextInt();
 
             if (itemIndex < 1 || itemIndex > linhaCarrinho) {
@@ -1012,8 +958,7 @@ public class CarrinhoDAO {
                 return 0;
             }
 
-            sql = "SELECT id_carrinho FROM piramide.carrinhos WHERE id_funcionario = ? ORDER BY id_carrinho ASC LIMIT 1 OFFSET ?";
-
+            sql = "SELECT id_carrinho, id_produto, quantidade FROM piramide.carrinhos WHERE id_cliente = ? ORDER BY id_carrinho ASC LIMIT 1 OFFSET ?";
             try (Connection conn = ConexaoBD.getConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -1021,64 +966,90 @@ public class CarrinhoDAO {
                 pstmt.setInt(2, itemIndex - 1);
 
                 ResultSet rs = pstmt.executeQuery();
-
                 if (rs.next()) {
                     idItemCarrinho = rs.getInt("id_carrinho");
+                    idProduto = rs.getInt("id_produto");
+                    quantidade = rs.getInt("quantidade");
                 } else {
-                    System.out.println("Item não encontrado1.");
+                    System.out.println("Item não encontrado.");
+                    return 0;
                 }
 
             } catch (SQLException e) {
-                System.out.println("Erro ao remover item do carrinho: " + e.getMessage());
+                System.out.println("Erro ao buscar o item: " + e.getMessage());
+                return 0;
             }
 
-            sql = "SELECT preco, quantidade, total FROM piramide.carrinhos WHERE id_carrinho = ? AND id_funcionario = ?";
+            sql = """
+                SELECT pi.id_ingrediente, pi.quantidade AS qtd_ingrediente, 
+                       ci.estoque AS estoque_ingrediente
+                FROM piramide.produtos_ingredientes pi
+                JOIN piramide.carrinhos_ingredientes ci ON ci.id_ingrediente = pi.id_ingrediente
+                WHERE pi.id_produto = ?
+                """;
 
+            try (Connection conn = ConexaoBD.getConnection();
+                 PreparedStatement pstmtIngredientes = conn.prepareStatement(sql)) {
+
+                pstmtIngredientes.setInt(1, idProduto);
+
+                try (ResultSet rsIngredientes = pstmtIngredientes.executeQuery()) {
+                    boolean primeiroIngrediente = true;
+
+                    while (rsIngredientes.next()) {
+                        int qtdIngredientePorProduto = rsIngredientes.getInt("qtd_ingrediente");
+                        int estoqueIngrediente = rsIngredientes.getInt("estoque_ingrediente");
+                        int idIngrediente = rsIngredientes.getInt("id_ingrediente");
+
+                        int quantidadePorIngrediente = estoqueIngrediente / qtdIngredientePorProduto;
+
+                        if (primeiroIngrediente) {
+                            quantidadeMaximaDisponivel = quantidadePorIngrediente;
+                            primeiroIngrediente = false;
+                        } else {
+                            quantidadeMaximaDisponivel = Math.min(quantidadeMaximaDisponivel, quantidadePorIngrediente);
+                        }
+
+                        // Atualiza o estoque
+                        String updateEstoque = "UPDATE piramide.carrinhos_ingredientes SET estoque = ? WHERE id_ingrediente = ?";
+                        try (PreparedStatement pstmtUpdate = conn.prepareStatement(updateEstoque)) {
+                            pstmtUpdate.setInt(1, estoqueIngrediente + (qtdIngredientePorProduto * quantidade));
+                            pstmtUpdate.setInt(2, idIngrediente);
+
+                            int rowsUpdated = pstmtUpdate.executeUpdate();
+
+                            if (rowsUpdated == 0) {
+                                System.out.println("Nenhuma linha foi atualizada para o ingrediente " + idIngrediente);
+                            }
+                        }
+                    }
+                }
+
+            } catch (SQLException e) {
+                System.err.println("Erro ao processar ingredientes: " + e.getMessage());
+                return 0;
+            }
+
+            // Remove o item do carrinho
+            sql = "DELETE FROM piramide.carrinhos WHERE id_carrinho = ? AND id_funcionario = ?";
             try (Connection conn = ConexaoBD.getConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
                 pstmt.setInt(1, idItemCarrinho);
                 pstmt.setInt(2, idFuncionario);
 
-                ResultSet rs = pstmt.executeQuery();
-
-                if (rs.next()) {
-                    preco = rs.getDouble("preco");
-                    quantidade = rs.getInt("quantidade");
-                    total = rs.getDouble("total");
-
-                    System.out.println(preco);
-                    System.out.println(quantidade);
-                    System.out.println(total);
-                    totalFinal = (preco * quantidade);
-                } else {
-                    System.out.println("Item não encontrado2.");
-                }
-
-            } catch (SQLException e) {
-                System.out.println("Erro ao remover item do carrinho: " + e.getMessage());
-            }
-
-            sql = "DELETE FROM piramide.carrinhos WHERE id_carrinho = ? AND id_funcionario = ?";
-
-            try (Connection conn = ConexaoBD.getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-                pstmt.setInt(1, idItemCarrinho); // ID do item a ser removido
-                pstmt.setInt(2, idFuncionario); // ID do cliente
-
-                // Executa a exclusão e verifica se algo foi excluído
                 int rowsAffected = pstmt.executeUpdate();
-
                 if (rowsAffected > 0) {
                     System.out.println("Item removido do carrinho com sucesso!");
                 } else {
                     System.out.println("Nenhum item encontrado para exclusão.");
                 }
+
             } catch (SQLException e) {
                 System.out.println("Erro ao remover item do carrinho: " + e.getMessage());
             }
-        }else {
+
+        } else {
             System.out.println("O carrinho está vazio!");
         }
 
@@ -1146,13 +1117,9 @@ public class CarrinhoDAO {
         return idCarrinho;
     }
 
-    public static void carrinhoFuncionarioDAO(int idFuncionario) {
-        String sql = "SELECT dp.id_carrinho, p2.nome_produto, dp.quantidade, dp.preco " +
-                "FROM piramide.funcionarios f " +
-                "JOIN piramide.carrinhos dp ON dp.id_funcionario = f.id_funcionario " +
-                "JOIN piramide.produtos p2 ON p2.id_produto = dp.id_produto " +
-                "WHERE f.id_funcionario = ? " +
-                "ORDER BY dp.id_carrinho ASC";
+    public static int carrinhoFuncionarioDAO(int idFuncionario) {
+        int idCarrinho = 0, condição = 0;
+        String sql = "SELECT id_carrinho FROM piramide.carrinhos WHERE id_funcionario = ?";
 
         try (Connection conn = ConexaoBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -1160,18 +1127,44 @@ public class CarrinhoDAO {
             stmt.setInt(1, idFuncionario);
 
             ResultSet rs = stmt.executeQuery();
-            //System.out.println("\nPedido: " + rs.getInt("id_pedido") +
-            //" Data: " + rs.getDate("data_pedido"));
-            while (rs.next()) {
-                System.out.println("===========================");
-                System.out.println("Produto: " + rs.getString("nome_produto") +
-                        "\nQuantidade: " + rs.getInt("quantidade") +
-                        "\nPreço: " + rs.getDouble("preco"));
+
+            if (rs.next()) {
+                idCarrinho = rs.getInt("id_carrinho");
+
+                condição = 1;
             }
-            System.out.println("===========================");
+
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+
+        if(condição == 1){
+            sql = "SELECT dp.id_carrinho, p2.nome_produto, dp.quantidade, dp.preco " +
+                    "FROM piramide.clientes c " +
+                    "JOIN piramide.carrinhos dp ON dp.id_cliente = c.id_cliente " +
+                    "JOIN piramide.produtos p2 ON p2.id_produto = dp.id_produto " +
+                    "WHERE c.id_cliente = ? " +
+                    "ORDER BY dp.id_carrinho ASC";
+
+            try (Connection conn = ConexaoBD.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                // Define o parâmetro da consulta
+                stmt.setInt(1, idFuncionario);
+
+                ResultSet rs = stmt.executeQuery();
+                while (rs.next()) {
+                    System.out.println("===========================");
+                    System.out.println("Produto: " + rs.getString("nome_produto") +
+                            "\nQuantidade: " + rs.getInt("quantidade") +
+                            "\nPreço Unitário: " + rs.getDouble("preco"));
+                }
+                System.out.println("===========================");
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+            }
+            return 2;
+        }
+        return 1;
     }
 
     public static double totalCarrinhoFuncionarioDAO(int idCarrinho) {
