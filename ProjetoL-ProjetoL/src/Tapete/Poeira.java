@@ -7,6 +7,7 @@ import java.util.Scanner;
 import BancoDeDados.*;
 import Entidades.*;
 
+import static BancoDeDados.CarrinhoIngredienteDAO.*;
 import static BancoDeDados.CarrinhoDAO.*;
 import static BancoDeDados.MesaDAO.mesaDAO;
 import static BancoDeDados.PedidoDAO.*;
@@ -210,7 +211,10 @@ public class Poeira {
 
                                 if (simOuNao == 1) {
                                     System.out.println("Pedido Realizado!");
+
                                     finalizarCarrinhoClienteDAO(idLoginCliente, total);
+                                    finalizarCarrinhoIngrediente();
+
                                     menuAdicionarProduto = false;
                                     menuCliente = false;
                                 } else if (simOuNao == 2) {
