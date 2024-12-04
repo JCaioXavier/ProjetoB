@@ -135,7 +135,6 @@ public class CarrinhoDAO {
 
                     if(quantidadeMax == 2){
                         duplicata = carrinhoSemDuplicataCliente(item, idCliente);
-
                     }
 
                     if(duplicata == 1){

@@ -145,24 +145,19 @@ public class ProdutoIngredienteDAO {
                     boolean primeiroIngrediente = true;
                     int quantidadeMaximaDisponivel = 0;
 
-
                     while (rsIngredientes.next()) {
                         int qtdIngredientePorProduto = rsIngredientes.getInt("qtd_ingrediente");
                         int estoqueIngrediente = rsIngredientes.getInt("estoque_ingrediente");
 
-
                         int quantidadePorIngrediente = estoqueIngrediente / qtdIngredientePorProduto;
-
 
                         if (primeiroIngrediente) {
                             quantidadeMaximaDisponivel = quantidadePorIngrediente;
                             primeiroIngrediente = false;
                         } else {
                             quantidadeMaximaDisponivel = Math.min(quantidadeMaximaDisponivel, quantidadePorIngrediente);
-                            System.out.println();
                         }
                     }
-
 
                     if (quantidade > quantidadeMaximaDisponivel) {
                         if(quantidadeMaximaDisponivel == 0){
