@@ -52,7 +52,7 @@ public class ProdutoIngredienteDAO {
                     Integer.parseInt(novaQuantidadeString);
 
                     if (!novaQuantidadeString.isEmpty()) {
-                        novoPI.quantidade = Integer.parseInt(novaQuantidadeString); // Atu
+                        novoPI.quantidade = Integer.parseInt(novaQuantidadeString);
                         break;
                     } else if (novoPI.quantidade < 0) {
                         System.out.println("Quantidade não pode ser menor que 0! Digite novamente.");
@@ -110,7 +110,6 @@ public class ProdutoIngredienteDAO {
 
         try (Connection conn = ConexaoBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            // Define o parâmetro da consulta
             stmt.setString(1, nome_produto);
 
             ResultSet rs = stmt.executeQuery();

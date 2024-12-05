@@ -1,4 +1,4 @@
-//Gerenciador de Clientes
+
 package Util;
 
 import BancoDeDados.ConexaoBD;
@@ -16,7 +16,7 @@ import static BancoDeDados.CriptografiaDAO.Criptografia;
 public class GerenciadorDeClientes {
     private static int contadorClientes = 2;
 
-    public static void confirmarDadosClientes(Cliente cliente) { //PEDE A CONFIRMAÇÃO DOS DADOS ************************
+    public static void confirmarDadosClientes(Cliente cliente) {
         System.out.println("\n" +
                 "Seus dados estão corretos?\n" +
                 "===========================\n" +
@@ -29,7 +29,7 @@ public class GerenciadorDeClientes {
                 "===========================");
     }
 
-    private static void checkadordeClientes(Cliente novoCliente, List<Cliente> clientesExistentes) { //VERIFICA SE USUÁRIO JA EXISTE ***
+    private static void checkadordeClientes(Cliente novoCliente, List<Cliente> clientesExistentes) {
         Scanner scanner = new Scanner(System.in);
         boolean usuarioExistente;
 
@@ -58,7 +58,7 @@ public class GerenciadorDeClientes {
         } while (usuarioExistente);
     }
 
-    public static int loginCliente(List<Cliente> clientes) {//LOGIN DO CLIENTE *****************************************
+    public static int loginCliente(List<Cliente> clientes) {
         Scanner scanner = new Scanner(System.in);
 
         String usuario, senha;
@@ -68,8 +68,8 @@ public class GerenciadorDeClientes {
             System.out.print("Digite seu usuário: ");
             usuario = scanner.nextLine();
 
-            for (Cliente cliente : clientes) {//percorre a lsita de usuarios cadastrados
-                if (cliente.usuario.equals(usuario)) {//verfica se o usuario inserido está cadastrado
+            for (Cliente cliente : clientes) {
+                if (cliente.usuario.equals(usuario)) {
 
                     loginCliente = cliente;
                     break;
@@ -84,7 +84,7 @@ public class GerenciadorDeClientes {
             System.out.print("Digite sua senha: ");
             senha = scanner.nextLine();
 
-            if (!loginCliente.senha.equals(senha)) {//confere se a senha digitada é diferente do usuário inserido (loginCliente = cliente)
+            if (!loginCliente.senha.equals(senha)) {
                 System.out.println("Senha incorreta! Digite novamente.");
             }
         } while (!loginCliente.senha.equals(senha));
@@ -196,7 +196,7 @@ public class GerenciadorDeClientes {
         return clienteAtual;
     }
 
-    public static int opcaoMenuCliente() {//OPÇÃO MENU DO ADMINISTRADOR ---------------------------------------------------
+    public static int opcaoMenuCliente() {
         Scanner scanner = new Scanner(System.in);
         int opcao;
 

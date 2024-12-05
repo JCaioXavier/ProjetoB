@@ -159,7 +159,7 @@ public class FuncionarioDAO {
 
             pstmt.setInt(1, id);
 
-            pstmt.executeUpdate(); // Executa a consulta DELETE
+            pstmt.executeUpdate();
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -185,7 +185,7 @@ public class FuncionarioDAO {
         return totalFuncionarios;
     }
 
-    public static int loginFuncionarioDAO(Funcionario funcionarios) {//LOGIN DO CLIENTE *****************************************
+    public static int loginFuncionarioDAO(Funcionario funcionarios) {
         Scanner scanner = new Scanner(System.in);
 
         String senhaLogin, senha;
@@ -213,7 +213,6 @@ public class FuncionarioDAO {
 
                 if (rs.next()) {
                     usuarioExistente = false;
-                    //pstmt.setInt(1, clientes.id_cliente);
                     idFuncionario = rs.getInt("id_funcionario");
                 } else {
                     System.out.println("Usuário incorreto! Digite novamente.");
@@ -258,7 +257,7 @@ public class FuncionarioDAO {
         return idFuncionario;
     }
 
-    public static void perfilFuncionario(int id) {//LOGIN DO CLIENTE *****************************************
+    public static void perfilFuncionario(int id) {
 
         String sql = "SELECT id_funcionario, nome_funcionario, usuario, cpf, telefone, endereco FROM piramide.funcionarios WHERE id_funcionario = " + id;
         try (Connection conn = ConexaoBD.getConnection();

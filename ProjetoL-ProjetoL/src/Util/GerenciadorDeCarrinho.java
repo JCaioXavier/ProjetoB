@@ -9,7 +9,7 @@ import java.util.Scanner;
 import static Util.DadosEstaticos.gerarProduto;
 
 public class GerenciadorDeCarrinho {
-    public static List<Carrinho> adicionarProduto(List<Carrinho> comprarProduto, int i) {//-------------------------------
+    public static List<Carrinho> adicionarProduto(List<Carrinho> comprarProduto, int i) {
         Carrinho addProduto = new Carrinho();
         int id = comprarProduto.size();
 
@@ -27,11 +27,10 @@ public class GerenciadorDeCarrinho {
         return comprarProduto;
     }
 
-    public static void removerItem(List<Carrinho> carrininho, int indexProduto) {//--------------------------------------
+    public static void removerItem(List<Carrinho> carrininho, int indexProduto) {
         if (indexProduto >= 0 && indexProduto < carrininho.size()) {
             carrininho.remove(indexProduto);
 
-            // Atualiza os IDs dos produtos após a remoção
             for (int i = 0; i < carrininho.size(); i++) {
                 carrininho.get(i).id_produto = i + 1;
             }
@@ -41,7 +40,7 @@ public class GerenciadorDeCarrinho {
         }
     }
 
-    public static int pegarItem(List<Carrinho> produtos) {//PEGAR ID DO ITEM ---------------------------------------------
+    public static int pegarItem(List<Carrinho> produtos) {
         Scanner scanner = new Scanner(System.in);
         int indexProduto;
         do {

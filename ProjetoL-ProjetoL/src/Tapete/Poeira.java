@@ -107,7 +107,6 @@ public class Poeira {
                 } while (menuBoolean);
             } while (telaMenu);
 
-            //TELA DO CLIENTE ------------------------------------------------------------------------------------------
             double total = 0, subtrairTotal = 0;
             int opcaoMenuCliente, opcaoRetorno = 0, idPedido = 0, idPedido1 = 0, a = 0, original, opcaoVoltarBoolean, idCarrinho = 0;
             boolean menuCliente = true, menuAdicionarProduto = true, editarPerfil = true, historicoDePedido = true, adicionarProduto = true,
@@ -151,7 +150,6 @@ public class Poeira {
                             }
 
                             while (adicionarProduto) {
-
                                 adicionarCarrinhoClienteDAO(idLoginCliente);
 
                                 carrinhoClienteDAO(idLoginCliente);
@@ -197,7 +195,7 @@ public class Poeira {
                                     menuAdicionarProduto = false;
                                 } else if (opcao == 2) {
                                     carrinhoClienteDAO(idLoginCliente);
-                                    subtrairTotal = removerItemCarrinhoClienteDAO(idLoginCliente);//
+                                    subtrairTotal = removerItemCarrinhoClienteDAO(idLoginCliente);
                                     totalCarrinhoSubtrairClienteDAO(idLoginCliente, subtrairTotal);
                                     opcaoVoltar = true;
                                 }
@@ -293,8 +291,6 @@ public class Poeira {
                 } while (menuCliente);
             }
 
-            //TELA DO FUNCIONARIO --------------------------------------------------------------------------------------
-
             boolean menuFuncionario = true, gereciarMesas = true;
             List<Mesa> mesas = new ArrayList<>();
 
@@ -360,7 +356,6 @@ public class Poeira {
                             }
 
                             while (adicionarProduto) {
-
                                 adicionarCarrinhoFuncionarioDAO(idLoginFuncionario);
 
                                 carrinhoFuncionarioDAO(idLoginFuncionario);
@@ -469,7 +464,6 @@ public class Poeira {
 
             }
 
-            //TELA ADMINISTRADOR ---------------------------------------------------------------------------------------
             int opcaoMenuAdmin, opcaoGerenciamentoFuncionarios, opcaoGerenciamentoClientes, opcaoGerenciamentoProdutos, opcaoGerenciamentoIngredientes;
             int idFuncionario = 0, idProduto, idIngrediente;
             boolean menuAdmin = true, menuAdminFuncionario = true, menuAdminCliente = true, menuAdminProdutos = true, menuAdminIngredientes = true;
@@ -515,7 +509,7 @@ public class Poeira {
 
                                     simOuNao = simOuNao();
 
-                                    if (simOuNao == 1) {//SIM
+                                    if (simOuNao == 1) {
                                         System.out.println("Funcionário(a) cadastrado(a) com sucesso!!!!");
 
                                         funcionarios.add(novoFuncionario);
@@ -581,7 +575,7 @@ public class Poeira {
                                         }
                                     }
                                 } while (editarFuncionario);
-                            } else if (opcaoGerenciamentoFuncionarios == 4) {//4 | REMOVER FUNCIONÁRIO
+                            } else if (opcaoGerenciamentoFuncionarios == 4) {
                                 boolean removerFuncionarios = true;
                                 int opcao;
 
@@ -694,7 +688,7 @@ public class Poeira {
 
                                     simOuNao = simOuNao();
 
-                                    if (simOuNao == 1) {//SIM
+                                    if (simOuNao == 1) {
                                         produtos.add(novoProduto);
                                         inserirProdutoDAO(novoProduto);
 

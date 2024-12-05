@@ -1,4 +1,4 @@
-//GerenciadorDeIngredientes
+
 package Util;
 
 import Entidades.Ingrediente;
@@ -13,14 +13,14 @@ import static Util.RevisarOpcao.simOuNao;
 
 public class GerenciadorDeIngredientes {
 
-    public static void confirmarDadosIngredientes(Ingrediente ingrediente) { //PEDE A CONFIRMAÇÃO DOS DADOS ************************
+    public static void confirmarDadosIngredientes(Ingrediente ingrediente) {
         System.out.println("Os dados do produto estão corretos?" +
                 "\nId_produto: " + ingrediente.id_ingrediente + "\n" +
                 "Nome: " + ingrediente.nome + "\n" +
                 "Estoque: " + ingrediente.estoque + "\n");
     }
 
-    public static Ingrediente cadastrarIngrediente() { //CADASTRO --------------
+    public static Ingrediente cadastrarIngrediente() {
         Ingrediente novoIngrediente = new Ingrediente();
         Scanner scanner = new Scanner(System.in);
 
@@ -34,7 +34,7 @@ public class GerenciadorDeIngredientes {
                 Integer.parseInt(novoEstoqueString);
 
                 if (!novoEstoqueString.isEmpty()) {
-                    novoIngrediente.estoque = Integer.parseInt(novoEstoqueString); // Atu
+                    novoIngrediente.estoque = Integer.parseInt(novoEstoqueString);
                     break;
                 } else if (novoIngrediente.estoque < 0) {
                     System.out.println("Estoque não pode ser menor que 0! Digite novamente.");
@@ -47,14 +47,14 @@ public class GerenciadorDeIngredientes {
         return novoIngrediente;
     }
 
-    private static void checkadordeIngredientes(Ingrediente novoIngrediente, List<Ingrediente> IngredientesExistentes) { //VERIFICA SE USUÁRIO JA EXISTE
+    private static void checkadordeIngredientes(Ingrediente novoIngrediente, List<Ingrediente> IngredientesExistentes){
         Scanner scanner = new Scanner(System.in);
         boolean espacoEmbrancoUm = true;
         boolean espacoEmbrancoDois;
         boolean ingredienteExistente;
 
         do {
-            ingredienteExistente = false; // Reseta o flag a cada iteração
+            ingredienteExistente = false;
 
             while (espacoEmbrancoUm) {
                 System.out.print("Digite o nome do Ingrediente: ");
@@ -85,21 +85,19 @@ public class GerenciadorDeIngredientes {
                             espacoEmbrancoDois = false;
                         } while (espacoEmbrancoDois);
 
-                        break; // Saia do loop se o usuário já existir
+                        break;
                     } else {
                         break;
                     }
                 }
-                // Verifica se o usuário já existe
             }
-        } while (ingredienteExistente); // Continua pedindo até um usuário único ser inserido
+        } while (ingredienteExistente);
 
     }
 
     public static void removerIngrediente(List<Ingrediente> ingredientes, int indexIngrediente) {
         if (indexIngrediente >= 0 && indexIngrediente < ingredientes.size()) {
             ingredientes.remove(indexIngrediente);
-            // Atualiza os IDs dos produtos após a remoção
             for (int i = 0; i < ingredientes.size(); i++) {
                 ingredientes.get(i).id_ingrediente = i + 1;
             }
@@ -117,7 +115,7 @@ public class GerenciadorDeIngredientes {
         ingredienteAtual.id_ingrediente = id;
         checkadordeIngredientesDAO(ingredienteAtual);
 
-        do {//estoque
+        do {
             try {
                 System.out.print("Digite o novo estoque do ingrediente: ");
                 String estoque = scanner.nextLine();
@@ -129,8 +127,8 @@ public class GerenciadorDeIngredientes {
                     System.out.println("\nConfirmar novo estoque?");
                     simOuNao = simOuNao();
                     if (simOuNao == 1) {
-                        ingredienteAtual.estoque = Integer.parseInt(estoque); // Atu
-                        break;// Atualiza
+                        ingredienteAtual.estoque = Integer.parseInt(estoque);
+                        break;
                     }
                 }
             } catch (NumberFormatException erro) {
@@ -142,26 +140,4 @@ public class GerenciadorDeIngredientes {
     }
 }
 
-    /*public static int pegarIngrediente(List<Ingrediente> ingredientes) {//PEGAR ID DO FUNCIONÁRIO -----------------------
-        Scanner scanner = new Scanner(System.in);
-        int idIngrediente = 0;
-        do {
-            try {
-                idIngrediente = scanner.nextInt(); //2 -thiago
-                if (idIngrediente == 1) {
-                    idIngrediente--;
-                    break;
-                }
-                idIngrediente--;
-
-                //0-adm, 1-thiago
-                if ((ingredientes.size() < idIngrediente) || (0 >= idIngrediente)) {//2 < 1 || 0 > 1
-                    System.out.println("Não existe funcionário com esse id! Digite novamente.");
-                }
-            } catch (IndexOutOfBoundsException erro) {
-                System.out.println("[ERROR], digite uma opção valida. ");
-            }
-        } while ((ingredientes.size() < idIngrediente) || (0 >= idIngrediente));
-        return idIngrediente;
-    }*/
 

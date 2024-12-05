@@ -1,4 +1,3 @@
-//GerenciadorDeFuncionarios
 
 package Util;
 
@@ -19,7 +18,7 @@ import static BancoDeDados.FuncionarioDAO.checkadordeFuncionariosDAO;
 public class GerenciadorDeFuncionarios {
     private static int contadorFuncionarios = 1;
 
-    public static void confirmarDadosFuncionarios(Funcionario funcionario, String senha) {//PEDE A CONFIRMAÇÃO DOS DADOS -------------
+    public static void confirmarDadosFuncionarios(Funcionario funcionario, String senha) {
         System.out.println("\n===========================" +
                 "Seus dados estão corretos?\n" +
                 "Usuario: " + funcionario.usuario + "\n" +
@@ -32,7 +31,7 @@ public class GerenciadorDeFuncionarios {
 
     }
 
-    public static Funcionario cadastrarFuncionarioDAO() { //CADASTRO --------------
+    public static Funcionario cadastrarFuncionarioDAO() {
         Funcionario novoFuncionario = new Funcionario();
         Scanner scanner = new Scanner(System.in);
 
@@ -124,7 +123,7 @@ public class GerenciadorDeFuncionarios {
     }
 
 
-    public static int loginFuncionario(List<Funcionario> funcionarios, int i) {//LOGIN ----------------------------------
+    public static int loginFuncionario(List<Funcionario> funcionarios, int i) {
         Scanner scanner = new Scanner(System.in);
 
         String usuario, senha;
@@ -157,25 +156,23 @@ public class GerenciadorDeFuncionarios {
         System.out.println("Logado com sucesso!");
 
         if (loginFuncionario.usuario.equals("admin") && loginFuncionario.senha.equals("admin")) {
-            //i = 1;
             return i + 1;
         }
         return i;
     }
 
-    public static int pegarFuncionario(List<Funcionario> funcionarios) {//PEGAR ID DO FUNCIONÁRIO -----------------------
+    public static int pegarFuncionario(List<Funcionario> funcionarios) {
         Scanner scanner = new Scanner(System.in);
         int idFuncionario = 0;
         do {
             try {
-                idFuncionario = scanner.nextInt(); //2 -thiago
+                idFuncionario = scanner.nextInt();
 
                 if (idFuncionario == 1) {
                     System.out.println("Administrador não pode ser alterado");
                 } else if (idFuncionario < 0 || idFuncionario == 0 || idFuncionario > funcionarios.size()) {
                     System.out.println("Não existe funcionário com esse id! Digite novamente.");
                 }
-                //0-adm, 1-thiago
             } catch (IndexOutOfBoundsException erro) {
                 System.out.println("[ERROR], digite uma opção valida. ");
             }
@@ -186,7 +183,6 @@ public class GerenciadorDeFuncionarios {
     public static void removerFuncionario(List<Funcionario> funcionarios, int indexFuncionario) {
         if (indexFuncionario >= 0 && indexFuncionario < funcionarios.size()) {
             funcionarios.remove(indexFuncionario);
-            // Atualiza os IDs dos funcionários após a remoção
             for (int i = 0; i < funcionarios.size(); i++) {
                 funcionarios.get(i).id_funcionario = i + 1;
             }
@@ -298,7 +294,7 @@ public class GerenciadorDeFuncionarios {
         return funcionarioAtual;
     }
 
-    public static int opcaoMenuFuncionario() {//OPÇÃO MENU DO ADMINISTRADOR ---------------------------------------------------
+    public static int opcaoMenuFuncionario() {
         Scanner scanner = new Scanner(System.in);
         int opcao;
 
@@ -325,7 +321,7 @@ public class GerenciadorDeFuncionarios {
         return opcao;
     }
 
-    public static Funcionario updateFuncionario(int id) {//-----------------------
+    public static Funcionario updateFuncionario(int id) {
         Scanner scanner = new Scanner(System.in);
         Funcionario funcionarioAtual = new Funcionario();
 
@@ -397,5 +393,4 @@ public class GerenciadorDeFuncionarios {
 
         return funcionarioAtual;
     }
-    //------------------------------------------------------------------------------------------------------------------
 }

@@ -23,13 +23,11 @@ public class DetalhePedidoDAO {
         try (Connection conn = ConexaoBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            // Define o parâmetro da consulta
             stmt.setInt(1, idPedido);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 System.out.println("Detalhes do Pedido:");
 
-                // Itera pelos resultados da consulta
                 while (rs.next()) {
                     System.out.println("===========================");
                     System.out.println("Produto: " + rs.getString("nome_produto"));
@@ -49,18 +47,15 @@ public class DetalhePedidoDAO {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Produtos disponíveis:");
-        produtosDAO(); // Mostra os produtos disponíveis
-
-        //novoPedido.id_pedido = idPedido;
+        produtosDAO();
 
         while (true) {
             try {
-                // Solicita o ID do produto
                 System.out.println("Selecione o número do item que deseja adicionar no pedido: ");
                 int item = pegarPedidoProdutoDAO();
                 novoPedido.id_item = item;
 
-                // Solicita a quantidade do produto
+
                 System.out.print("Qual a quantidade desse item no pedido? ");
                 int quantidade = Integer.parseInt(scanner.nextLine());
 
@@ -69,7 +64,6 @@ public class DetalhePedidoDAO {
                     continue;
                 }
 
-                // Confirmação da escolha
                 System.out.println("\nTem certeza que deseja adicionar " + quantidade + " unidades desse item ao pedido?");
                 int confirmacao = simOuNao();
 
@@ -78,10 +72,8 @@ public class DetalhePedidoDAO {
                     break;
                 }
             } catch (NumberFormatException e) {
-                // Tratamento de entrada inválida (letras, caracteres especiais, etc.)
                 System.out.println("Entrada inválida. Por favor, insira um número válido.");
             } catch (Exception e) {
-                // Tratamento genérico para outros erros
                 System.out.println("Ocorreu um erro: " + e.getMessage());
             }
         }
@@ -143,7 +135,7 @@ public class DetalhePedidoDAO {
             try (Connection conn = ConexaoBD.getConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-                pstmt.setInt(1, idProduto); // Define apenas o primeiro parâmetro
+                pstmt.setInt(1, idProduto);
                 ResultSet rs = pstmt.executeQuery();
 
                 if (rs.next()) {
@@ -170,7 +162,7 @@ public class DetalhePedidoDAO {
             try (Connection conn = ConexaoBD.getConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-                pstmt.setInt(1, idProduto); // Define apenas o primeiro parâmetro
+                pstmt.setInt(1, idProduto);
                 ResultSet rs = pstmt.executeQuery();
 
                 if (rs.next()) {
@@ -240,9 +232,9 @@ public class DetalhePedidoDAO {
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
                 if (idPedido == 0){
-                    pstmt.setInt(1, idDetalhePedido); // Define apenas o primeiro parâmetro
+                    pstmt.setInt(1, idDetalhePedido);
                 }else{
-                    pstmt.setInt(1, idPedido); // Define apenas o primeiro parâmetro
+                    pstmt.setInt(1, idPedido);
                 }
 
 
@@ -298,7 +290,7 @@ public class DetalhePedidoDAO {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                rs.getInt("id_detalhe_pedido"); // Pega o valor do último ID.
+                rs.getInt("id_detalhe_pedido");
             } else {
                 System.out.println("Nenhum pedido encontrado!");
             }
@@ -312,11 +304,9 @@ public class DetalhePedidoDAO {
     public static void removerDetalhePedidoDAO(int idPedido) {
         String sqlDetalhes = "DELETE FROM piramide.detalhes_pedidos WHERE id_pedido = ?";
 
-        // Inicia a transação
         try (Connection conn = ConexaoBD.getConnection()) {
-            conn.setAutoCommit(false); // Desativa o commit automático para controlar a transação
+            conn.setAutoCommit(false);
 
-            // Excluir os detalhes do pedido
             try (PreparedStatement pstmtDetalhes = conn.prepareStatement(sqlDetalhes)) {
                 pstmtDetalhes.setInt(1, idPedido);
                 int rowsDetalhes = pstmtDetalhes.executeUpdate();

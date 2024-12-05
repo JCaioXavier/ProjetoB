@@ -1,4 +1,4 @@
-//RevisarOpcao
+
 package Util;
 
 import Entidades.Cliente;
@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class RevisarOpcao {
 
 
-    public static int opcaoMenu() {//OPÇÃO PARA A TELA DO MENU INICIAL -------------------------------------------------
+    public static int opcaoMenu() {
         Scanner scanner = new Scanner(System.in);
         int opcao;
 
@@ -37,7 +37,7 @@ public class RevisarOpcao {
         return opcao;
     }
 
-    public static int opcaoCadastro() {//OPÇÕES PARA A TELA DE LOGIN E CADASTRO ----------------------------------------
+    public static int opcaoCadastro() {
         Scanner scanner = new Scanner(System.in);
         int opcao;
 
@@ -62,7 +62,7 @@ public class RevisarOpcao {
         return opcao;
     }
 
-    public static int opcaoLogin() {//OPÇÕES PARA A TELA DE LOGIN ------------------------------------------------------
+    public static int opcaoLogin() {
         Scanner scanner = new Scanner(System.in);
         int opcao;
 
@@ -88,7 +88,7 @@ public class RevisarOpcao {
         return opcao;
     }
 
-    public static int simOuNao() {//OPÇÃO SIM OU NÃO -------------------------------------------------------------------
+    public static int simOuNao() {
         Scanner scanner = new Scanner(System.in);
         int opcao;
 
@@ -113,7 +113,7 @@ public class RevisarOpcao {
         return opcao;
     }
 
-    public static int opcaoMenuAdmin() {//OPÇÃO MENU DO ADMINISTRADOR ---------------------------------------------------
+    public static int opcaoMenuAdmin() {
         Scanner scanner = new Scanner(System.in);
         int opcao;
 
@@ -141,7 +141,7 @@ public class RevisarOpcao {
         return opcao;
     }
 
-    public static int opcaoPadraoUm() {// 1 OPÇÃO ----------------------------------------------------------------------
+    public static int opcaoPadraoUm() {
         Scanner scanner = new Scanner(System.in);
         int opcao;
 
@@ -162,7 +162,7 @@ public class RevisarOpcao {
         return opcao;
     }
 
-    public static int opcaoPadraoUmADois() {// 2 OPÇÕES ----------------------------------------------------------------
+    public static int opcaoPadraoUmADois() {
         Scanner scanner = new Scanner(System.in);
         int opcao;
 
@@ -183,7 +183,7 @@ public class RevisarOpcao {
         return opcao;
     }
 
-    public static int opcaoPadraoUmATres() {// 3 OPÇÕES ----------------------------------------------------------------
+    public static int opcaoPadraoUmATres() {
         Scanner scanner = new Scanner(System.in);
         int opcao;
 
@@ -204,7 +204,7 @@ public class RevisarOpcao {
         return opcao;
     }
 
-    public static int opcaoPadraoUmAQuatro() {// 4 OPÇÕES --------------------------------------------------------------
+    public static int opcaoPadraoUmAQuatro() {
         Scanner scanner = new Scanner(System.in);
         int opcao;
 
@@ -225,7 +225,7 @@ public class RevisarOpcao {
         return opcao;
     }
 
-    public static int opcaoPadraoUmACinco() {// 5 OPÇÕES ---------------------------------------------------------------
+    public static int opcaoPadraoUmACinco() {
         Scanner scanner = new Scanner(System.in);
         int opcao;
 

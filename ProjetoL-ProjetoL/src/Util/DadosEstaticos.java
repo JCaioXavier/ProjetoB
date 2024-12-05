@@ -1,4 +1,4 @@
-//Dados estaticos
+
 package Util;
 
 import Entidades.*;

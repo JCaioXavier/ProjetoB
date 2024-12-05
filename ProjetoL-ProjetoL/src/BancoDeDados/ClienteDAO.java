@@ -144,7 +144,7 @@ public class ClienteDAO {
         } while (usuarioExistente);
     }
 
-    public static int loginClienteDAO(Cliente clientes) {//LOGIN DO CLIENTE *****************************************
+    public static int loginClienteDAO(Cliente clientes) {
         Scanner scanner = new Scanner(System.in);
 
         int idUsuario = 0;
@@ -173,7 +173,6 @@ public class ClienteDAO {
 
                 if (rs.next()) {
                     usuarioExistente = false;
-                    //pstmt.setInt(1, clientes.id_cliente);
                     idUsuario = rs.getInt("id_cliente");
                 } else {
                     System.out.println("Usuário incorreto! Digite novamente.");
@@ -218,7 +217,7 @@ public class ClienteDAO {
         return idUsuario;
     }
 
-    public static void perfilCliente(int id) {//LOGIN DO CLIENTE *****************************************
+    public static void perfilCliente(int id) {
 
         String sql = "SELECT id_cliente, nome_cliente, usuario, cpf, telefone, endereco FROM piramide.clientes WHERE id_cliente = " + id;
         try (Connection conn = ConexaoBD.getConnection();
@@ -239,11 +238,11 @@ public class ClienteDAO {
         }
     }
 
-    public static Cliente cadastrarClienteDAO() {//CADASTRAR NOVO CLIENTE ******************
+    public static Cliente cadastrarClienteDAO() {
         Cliente novoCliente = new Cliente();
         Scanner scanner = new Scanner(System.in);
 
-        checkadorDeClienteDAO(novoCliente);// Passando a lista de clientes existentes
+        checkadorDeClienteDAO(novoCliente);
 
         Map<String, String> resultado = Criptografia();
 
@@ -301,7 +300,7 @@ public class ClienteDAO {
         return novoCliente;
     }
 
-    public static void confirmarDadosClientesDAO(Cliente cliente, String senha) { //PEDE A CONFIRMAÇÃO DOS DADOS ************************
+    public static void confirmarDadosClientesDAO(Cliente cliente, String senha) {
         System.out.println("\n===========================" +
                 "Seus dados estão corretos?\n" +
                 "Usuário: " + cliente.usuario + "\n" +

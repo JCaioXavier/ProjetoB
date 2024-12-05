@@ -20,14 +20,6 @@ public class GerenciadorDeHistoricoPedido {
 
         System.out.println("Número de itens no carrinho: " + listaCarrinho.size());
 
-        /*
-        for (int i = 0; i < listaCarrinho.size(); i++) {
-            addHistorico.produtos.add(listaCarrinho.get(i).id_item); // Adiciona o produto à lista
-            System.out.println("Produto adicionado: " + listaCarrinho.get(i).id_item);
-        }
-
-         */
-
         addHistorico.total = total;
         addHistorico.endereco = clientes.get(id_Cliente - 1).endereco;
 

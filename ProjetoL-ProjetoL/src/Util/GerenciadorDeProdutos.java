@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 public class GerenciadorDeProdutos {
 
-    public static void confirmarDadosProdutos(Produto produto) { //PEDE A CONFIRMAÇÃO DOS DADOS ************************
+    public static void confirmarDadosProdutos(Produto produto) {
         System.out.println("Os dados do produto estão corretos?"
                 + "\nId_produto: " + produto.id_produto + "\n"
                 + "Nome: " + produto.nome + "\n"
@@ -19,7 +19,7 @@ public class GerenciadorDeProdutos {
                 + "Preço: " + produto.preco + "\n");
     }
 
-    public static Produto cadastrarProduto() { //CADASTRO --------------
+    public static Produto cadastrarProduto() {
         Produto novoProduto = new Produto();
         Scanner scanner = new Scanner(System.in);
 
@@ -34,7 +34,7 @@ public class GerenciadorDeProdutos {
                 Double.parseDouble(novoPrecoString);
 
                 if (!novoPrecoString.isEmpty()) {
-                    novoProduto.preco = Double.parseDouble(novoPrecoString); // Atu
+                    novoProduto.preco = Double.parseDouble(novoPrecoString);
                     break;
                 } else if (novoProduto.preco < 0) {
                     System.out.println("Preço não pode ser menor que 0! Digite novamente.");
@@ -51,7 +51,7 @@ public class GerenciadorDeProdutos {
 
 
 
-    private static void checkadordeProdutos(Produto novoProduto, List<Produto> ProdutosExistentes) {//--------------------------------------
+    private static void checkadordeProdutos(Produto novoProduto, List<Produto> ProdutosExistentes) {
         Scanner scanner = new Scanner(System.in);
         boolean produtoExistente;
 
@@ -79,7 +79,7 @@ public class GerenciadorDeProdutos {
         } while (produtoExistente);
     }
 
-    public static int pegarProdutos(List<Produto> produtos) {//PEGAR ID DO FUNCIONÁRIO ----------------
+    public static int pegarProdutos(List<Produto> produtos) {
         Scanner scanner = new Scanner(System.in);
         int indexProduto = 0;
         do {
@@ -97,10 +97,9 @@ public class GerenciadorDeProdutos {
         return indexProduto;
     }
 
-    public static void removerProdutos(List<Produto> produtos, int indexProduto) {//------------------------------------
+    public static void removerProdutos(List<Produto> produtos, int indexProduto) {
         if (indexProduto >= 0 && indexProduto < produtos.size()) {
             produtos.remove(indexProduto);
-            // Atualiza os IDs dos produtos após a remoção
             for (int i = 0; i < produtos.size(); i++) {
                 produtos.get(i).id_produto = i + 1;
             }
@@ -110,71 +109,8 @@ public class GerenciadorDeProdutos {
         }
     }
 
-    /*public static void editarProduto(List<Produto> produtos, int indexProduto) {//--------------------------------------
-        Scanner scanner = new Scanner(System.in);
-        int simOuNao;
 
-        if (indexProduto >= 0 && indexProduto < produtos.size()) {
-            Produto produtoAtual = produtos.get(indexProduto);
-
-            System.out.println("\nProduto atual: " + produtoAtual);// mostra as informações do produto escolhido
-
-            checkadordeProdutos(produtoAtual, produtos);
-
-            //nome
-            do {//estoque
-                try {
-                    System.out.print("Digite o novo estoque do produto: ");
-                    String novoEstoqueString = scanner.nextLine();
-
-                    Integer.parseInt(novoEstoqueString);
-
-                    if (!novoEstoqueString.isEmpty()) {
-                        System.out.println(novoEstoqueString);
-                        System.out.println("\nConfirmar novo estoque?");
-                        simOuNao = simOuNao();
-                        if (simOuNao == 1) {
-                            produtoAtual.estoque = Integer.parseInt(novoEstoqueString); // Atu
-                            break;// Atualiza
-                        }
-                    }
-                } catch (NumberFormatException erro) {
-                    System.out.println("[ERROR]");
-                }
-            } while (true);
-
-            System.out.println("\nProduto atual: " + produtoAtual);
-
-            do {
-                //preço
-                try {
-                    System.out.print("Digite o novo preço do produto: ");
-                    String preco = scanner.nextLine();
-
-                    Double.parseDouble(preco);
-
-                    if (!preco.isEmpty()) {
-                        System.out.println(preco);
-                        System.out.println("\nConfirmar novo preço?");
-                        simOuNao = simOuNao();
-                        if (simOuNao == 1) {
-                            produtoAtual.preco = Double.parseDouble(preco); // Atu
-                            break;// Atualiza
-                        }
-                    }
-                } catch (NumberFormatException erro) {
-                    System.out.println("[ERROR]");
-                }
-            } while (true);
-            System.out.println("Produto editado com sucesso!");
-        } else {
-            System.out.println("Não existe produto com esse ID!");
-        }
-
-    }
-    */
-
-    public static Produto editarProduto(int id) {//--------------------------------------
+    public static Produto editarProduto(int id) {
         Scanner scanner = new Scanner(System.in);
         Produto produtoAtual = new Produto();
         int simOuNao;
